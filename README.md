@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 ![header.png](header.png)
-=======
-# Django Simple Note Project
->>>>>>> refs/remotes/origin/main
 
 # Note App
 

@@ -2,7 +2,9 @@
 
 # Note App
 
-A project for learning purposes.
+🎯 A project for learning purposes.
+
+🦦 You can check my [Django](https://fatmakahveci.com/coding/django/) notes in my blog.
 
 ## Installation
 
@@ -42,7 +44,3 @@ python manage.py migrate
 ```bash
 python manage.py runserver
 ```
-
----
-
-- You can check my Django notes in [my blog](https://fatmakahveci.com/coding/django/).

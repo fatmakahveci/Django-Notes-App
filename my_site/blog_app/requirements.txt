@@ -1,4 +1,4 @@
-Django==4.2.26
-djangorestframework==3.12.2
-django-cors-headers==3.5.0
-django-tinymce
+Django==4.2.30
+djangorestframework==3.16.1
+django-cors-headers==4.9.0
+django-tinymce==5.0.0

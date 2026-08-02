@@ -20,21 +20,21 @@ cd Django-Notes-App
 
 ```bash
 # Create a virtual environment
-python3.11 -m venv env
+python3 -m venv .venv
 ```
 
 ```bash
-# activate the virtual env
-source env/bin/activate
+# Activate the virtual environment
+source .venv/bin/activate
 ```
 
 ```bash
-# install packages
-pip install -r requirements.txt
+# Install packages
+pip install -r my_site/blog_app/requirements.txt
 ```
 
 ```bash
-cd backend
+cd my_site
 ```
 
 ```bash
@@ -44,3 +44,15 @@ python manage.py migrate
 ```bash
 python manage.py runserver
 ```
+
+## Production configuration
+
+Set the following environment variables before starting the application in production:
+
+```bash
+export DJANGO_DEBUG=false
+export DJANGO_SECRET_KEY='replace-with-a-long-random-secret'
+export DJANGO_ALLOWED_HOSTS='notes.example.com'
+```
+
+The application refuses to start in production without an explicit secret key. HTTPS redirect, secure cookies, and HSTS are enabled automatically when debug mode is disabled.

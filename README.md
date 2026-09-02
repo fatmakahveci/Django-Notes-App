@@ -1,63 +1,63 @@
-![header.png](header.png)
-
-# Note App
+# Django Notes App
 
 [![Last commit](https://img.shields.io/github/last-commit/fatmakahveci/Django-Notes-App)](https://github.com/fatmakahveci/Django-Notes-App/commits/main)
 [![Python](https://img.shields.io/badge/Python-3-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![Django](https://img.shields.io/badge/Django-5.2-092E20?logo=django&logoColor=white)](https://www.djangoproject.com/)
 [![License](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE.md)
 
-🎯 A project for learning purposes.
+A server-rendered Django application for organizing authored posts with categories, authentication screens, and rich-text editing.
 
-🦦 You can check my [Django](https://fatmakahveci.com/django-note/django/) and [python](https://fatmakahveci.com/python-note/) notes in my blog.
+## Highlights
 
-## Installation
+- Post, author, and category domain models
+- Account signup, login, and logout routes
+- Rich-text editing with Django TinyMCE
+- Environment-driven production security settings
+
+## Technology
+
+- Python
+- Django
+- Django REST Framework
+- TinyMCE
+- SQLite
+
+## Getting Started
+
+### Prerequisites
+
+- Python 3.11 or newer
+- pip
+
+### Installation
 
 ```bash
-# Clone the repository
-git clone https://github.com/fatmakahveci/Django-Notes-App.git
-```
-
-```bash
-# Go to the directory
-cd Django-Notes-App
-```
-
-```bash
-# Create a virtual environment
 python3 -m venv .venv
-```
-
-```bash
-# Activate the virtual environment
 source .venv/bin/activate
-```
-
-```bash
-# Install packages
-pip install -r my_site/blog_app/requirements.txt
-```
-
-```bash
+python -m pip install -r my_site/blog_app/requirements.txt
 cd my_site
-```
-
-```bash
 python manage.py migrate
-```
-
-```bash
 python manage.py runserver
 ```
 
-## Production configuration
+Open http://127.0.0.1:8000.
 
-Set the following environment variables before starting the application in production:
+## Quality Checks
 
 ```bash
-export DJANGO_DEBUG=false
-export DJANGO_SECRET_KEY='replace-with-a-long-random-secret'
-export DJANGO_ALLOWED_HOSTS='notes.example.com'
+cd my_site && python manage.py check
+cd my_site && python manage.py test
 ```
 
-The application refuses to start in production without an explicit secret key. HTTPS redirect, secure cookies, and HSTS are enabled automatically when debug mode is disabled.
+## Repository Structure
+
+- `my_site/blog_app` — models, views, URLs, and dependencies
+- `my_site/templates` — server-rendered pages
+- `my_site/my_site` — project settings and root routing
+
+## Project Resources
+
+- [Changelog](CHANGELOG.md)
+- [Contributing guide](.github/CONTRIBUTING.md)
+- [Security policy](.github/SECURITY.md)
+- [License](LICENSE.md)

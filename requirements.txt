@@ -1,1 +1,1 @@
-
+-r my_site/blog_app/requirements.txt

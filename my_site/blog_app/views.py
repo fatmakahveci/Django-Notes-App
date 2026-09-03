@@ -3,8 +3,6 @@ from .forms import PostForm
 from django.contrib import messages
 from django.shortcuts import render, redirect
 
-from django.http import HttpResponse
-
 def home(request):
     posts = Post.objects.all()
     context = {"posts": posts}

@@ -18,7 +18,6 @@ A server-rendered Django application for organizing authored posts with categori
 
 - Python
 - Django
-- Django REST Framework
 - TinyMCE
 - SQLite
 
@@ -34,7 +33,7 @@ A server-rendered Django application for organizing authored posts with categori
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-python -m pip install -r my_site/blog_app/requirements.txt
+python -m pip install -r requirements.txt
 cd my_site
 python manage.py migrate
 python manage.py runserver
@@ -42,11 +41,55 @@ python manage.py runserver
 
 Open http://127.0.0.1:8000.
 
-## Quality Checks
+## Using the App
+
+Register an account, log in, and select **Create a new post**. Posts are public,
+and their author is assigned from the signed-in account. Categories are optional;
+create them in the admin using a superuser:
 
 ```bash
-cd my_site && python manage.py check
-cd my_site && python manage.py test
+python my_site/manage.py createsuperuser
+```
+
+The editor stores rich text; the public feed displays a plain-text preview to
+avoid rendering untrusted HTML.
+
+## Docker (Local Development)
+
+From the repository root:
+
+```bash
+docker compose up --build
+```
+
+Open http://127.0.0.1:8000. Migrations run automatically and SQLite data persists
+in the `notes-data` volume. This uses Django's development server.
+
+## Configuration
+
+Settings read environment variables from the process; `.env` is not loaded automatically.
+
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `DJANGO_DEBUG` | `true` | Development mode |
+| `DJANGO_SECRET_KEY` | Development-only key | Required when debug is disabled |
+| `DJANGO_ALLOWED_HOSTS` | `localhost,127.0.0.1` | Comma-separated hostnames |
+| `DJANGO_DATABASE_PATH` | `my_site/db.sqlite3` | SQLite database path |
+
+For production, set `DJANGO_DEBUG=false`, provide a private secret key and allowed
+hosts, configure HTTPS and a production WSGI/ASGI server, and serve the output of
+`python my_site/manage.py collectstatic`. Secure cookies and HTTPS redirects are
+enabled when debug is disabled.
+
+## Quality Checks
+
+Run from the repository root:
+
+
+```bash
+python my_site/manage.py check
+python my_site/manage.py makemigrations --check --dry-run
+python my_site/manage.py test blog_app
 ```
 
 ## Repository Structure

@@ -64,7 +64,8 @@ python my_site/manage.py runserver
 ```
 
 Migrations make categories optional, preserve full author names, and create
-authentication attempt counters. Previously truncated author names are restored
+authentication attempt counters. Migration `0011` backfills normalized search text
+for existing notes without changing their content. Previously truncated author names are restored
 when they match the linked account's first 20 characters; custom names are preserved.
 
 ## Using the App
@@ -73,7 +74,8 @@ when they match the linked account's first 20 characters; custom names are prese
 2. Select **Create a new post**, enter a title and visible text, and optionally choose categories.
 3. Select **Save** to publish. The feed shows 10 notes per page, newest first.
 4. Use **Search notes** and **Category**, then **Apply**, to narrow the list.
-   Filters remain active when you select **Previous** or **Next**.
+   Search uses visible text, including decoded character entities, and ignores
+   HTML tags. Filters remain active when you select **Previous** or **Next**.
 5. Open a title or **Read note** to see the full note. Owners see **Edit note**
    and **Delete note**. Deletion requires a separate confirmation.
 6. Select **My notes** to browse your own posts, or **Log out** to end your session.

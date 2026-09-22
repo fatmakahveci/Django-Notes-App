@@ -1,6 +1,7 @@
 """Convert editor HTML to ordinary text; callers must still escape the result."""
 
 import re
+import unicodedata
 from html.parser import HTMLParser
 
 
@@ -50,3 +51,11 @@ def plain_text(html):
     text = re.sub(r"[^\S\n]+", " ", text)
     text = re.sub(r" *\n *", "\n", text)
     return re.sub(r"\n{3,}", "\n\n", text).strip()
+
+
+def normalize_search(text):
+    return " ".join(unicodedata.normalize("NFKC", text).casefold().split())
+
+
+def search_document(title, content):
+    return normalize_search(f"{title}\n{plain_text(content)}")

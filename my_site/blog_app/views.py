@@ -5,12 +5,12 @@ from django.contrib.auth import login as auth_login
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db import transaction
-from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_http_methods
 
 from .forms import PostForm, SignupForm
 from .models import Author, Category, Post
+from .text import normalize_search
 
 
 def _post_list(request, *, mine=False):
@@ -20,7 +20,7 @@ def _post_list(request, *, mine=False):
     query = request.GET.get("q", "").strip()[:200]
     category = request.GET.get("category", "")
     if query:
-        posts = posts.filter(Q(title__icontains=query) | Q(content__icontains=query))
+        posts = posts.filter(search_text__contains=normalize_search(query))
     if category:
         if category.isascii() and category.isdigit() and len(category) <= 18:
             posts = posts.filter(categories__pk=int(category))

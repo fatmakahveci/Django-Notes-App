@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block document_title %}Import and export · Django Notes{% endblock %}
+{% block layout_class %}app-main-reading{% endblock %}
+{% block title %}Take your notes with you{% endblock %}
+{% block content %}
+<p><a href="{% url 'my-notes' %}">← My notes</a></p>
+<section class="surface mb-3" aria-labelledby="export-title">
+<h2 id="export-title" class="h4">Download a backup</h2>
+<p>Get your current notes as Markdown files in a ZIP archive, including drafts and Trash. The manifest records titles, tags, categories, visibility, and pinned status. Version history and recovery copies aren't included.</p>
+<p>Up to 1,000 notes, 200 KB per note, and 25 MB of text per archive.</p>
+<a class="btn btn-primary" href="{% url 'export-notes' %}">Download backup</a>
+</section>
+<section class="surface" aria-labelledby="import-title">
+<h2 id="import-title" class="h4">Import Markdown</h2>
+<p>Choose a UTF-8 Markdown file or ZIP archive. A first-line heading becomes the title. Backups from this app also restore tags, pinned status, and categories that still exist.</p>
+<p>Imports always create new private drafts, including notes previously in Trash. Existing notes are never overwritten. Importing the same file twice creates duplicates.</p>
+{% if error %}<p class="alert alert-danger" role="alert" id="import-error" tabindex="-1">{{ error }}</p>{% endif %}
+<form method="post" enctype="multipart/form-data">
+{% csrf_token %}
+<label class="form-label" for="import-file">Markdown or ZIP file</label>
+<input type="file" id="import-file" name="file" accept=".md,.zip" class="form-control" required aria-describedby="import-limits{% if error %} import-error{% endif %}"{% if error %} aria-invalid="true"{% endif %}>
+<p id="import-limits" class="form-text">Maximum 25 MB, 1,000 notes, and 200 KB per Markdown file.</p>
+<button class="btn btn-primary">Import as drafts</button>
+</form>
+</section>
+{% endblock %}

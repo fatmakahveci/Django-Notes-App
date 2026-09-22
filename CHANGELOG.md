@@ -4,7 +4,42 @@ User-facing changes and maintenance updates are recorded here.
 
 ## [Unreleased]
 
+### Security
+
+- Prevent caching of private note deletion confirmation pages.
+- Reject oversized requests before multipart parsing and cap streamed file data
+  before it reaches temporary storage, including requests with multiple files.
+- Run Docker as an unprivileged user; drop capabilities and prevent privilege
+  escalation in Compose. Document migration of existing volume permissions.
+- Add regression coverage for upload limits, CSRF, private response headers,
+  and deeply nested autosave input.
+
+### Project layout
+
+- Rename the source root to `src/`, the Django configuration package to `config`,
+  and the application package to `notes`, keeping the existing database identity.
+- Group regression tests under `src/notes/tests/` and templates by their purpose.
+- Move Dockerfile to the repository root and the demo GIF to `docs/`.
+- Update installation commands, CI, static references, and deployment paths.
+
 ### Added
+
+- A separate production Compose stack with Gunicorn, automatic Caddy HTTPS,
+  static serving, isolated proxy trust, and an HTTPS integration check in CI.
+- A reproducible demo recording covering recovery, pins, history, Trash, and backups.
+
+- A shared Docker entrypoint with automatic migrations, image-level health checks,
+  persistent SQLite storage, and HTTP startup checks in CI.
+
+- Private automatic editor recovery with stale-tab protection.
+- Sanitized rich-text reading, with headings, lists, emphasis, and links.
+- Trash with draft restoration and confirmed permanent deletion.
+- A private history of the last 50 saved versions and draft restoration.
+- Personal pins and comma-separated tags, date/tag filters, and search highlights.
+- Owner-scoped bulk tagging, visibility changes, and moving notes to Trash.
+- Markdown downloads, ZIP collection backups, and atomic draft-only imports.
+- Keyboard selection controls, live selection counts, larger touch targets, and
+  browser coverage for recovery, collection tools, and accessible navigation.
 
 - Private drafts with owner-only reading/downloads and publication controls.
 - Draft filters, sorting options, and clickable category filters.

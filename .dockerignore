@@ -1,6 +1,9 @@
 # Repository metadata and local tooling
 .git
 .github
+.agents
+.codex
+docs
 **/.idea
 **/.vscode
 
@@ -11,8 +14,8 @@
 **/__pycache__
 **/*.py[cod]
 **/.python-version
-my_site/bin
-my_site/pyvenv.cfg
+src/bin
+src/pyvenv.cfg
 
 # Local configuration and data must not enter the image
 **/.env

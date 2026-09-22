@@ -1,15 +1,45 @@
 {% extends "base.html" %}
-{% block title %}Notes{% endblock %}
+{% load note_text %}
+{% block title %}{% if mine %}My notes{% else %}Notes{% endif %}{% endblock %}
 {% block content %}
+<form method="get" class="note-filters" role="search">
+    <div>
+        <label for="note-query" class="form-label">Search notes</label>
+        <input type="search" name="q" id="note-query" class="form-control" maxlength="200" value="{{ query }}" placeholder="Title or content">
+    </div>
+    <div>
+        <label for="note-category" class="form-label">Category</label>
+        <select name="category" id="note-category" class="form-select">
+            <option value="">All categories</option>
+            {% for category in categories %}
+            <option value="{{ category.pk }}"{% if selected_category == category.pk|stringformat:"s" %} selected{% endif %}>{{ category }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Apply</button>
+    {% if query or selected_category %}<a href="{% if mine %}{% url 'my-notes' %}{% else %}{% url 'home' %}{% endif %}">Clear filters</a>{% endif %}
+</form>
 {% for post in posts %}
 <article>
-    <h2>{{ post.title }}</h2>
-    <div>{{ post.content|striptags|linebreaks }}</div>
+    <h2><a href="{% url 'post-detail' post.pk %}">{{ post.title }}</a></h2>
+    <div>{{ post.content|note_text|truncatechars:400|linebreaks }}</div>
     <small>Published on {{ post.publish_time|date:"M d, Y" }} by {{ post.author }}</small>
     <p>{% for category in post.categories.all %}<span class="badge bg-secondary">{{ category }}</span> {% endfor %}</p>
+    <a href="{% url 'post-detail' post.pk %}">Read note<span class="visually-hidden">: {{ post.title }}</span></a>
 </article>
 <hr>
 {% empty %}
+{% if query or selected_category %}
+<p>No notes match your filters.</p>
+{% else %}
 <p>No notes yet. <a href="{% url 'post-form' %}">Create the first note</a>.</p>
+{% endif %}
 {% endfor %}
+{% if page_obj.has_other_pages %}
+<nav aria-label="Notes pages" class="notes-pagination">
+    {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}{% if pagination_query %}&amp;{{ pagination_query }}{% endif %}">Previous</a>{% endif %}
+    <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}{% if pagination_query %}&amp;{{ pagination_query }}{% endif %}">Next</a>{% endif %}
+</nav>
+{% endif %}
 {% endblock %}

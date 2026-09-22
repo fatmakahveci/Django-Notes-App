@@ -1,13 +1,14 @@
 {% extends "base.html" %}
+{% block document_title %}{% if post %}Edit note{% else %}New note{% endif %} · Django Notes{% endblock %}
+{% block layout_class %}app-main-editor{% endblock %}
+{% block eyebrow %}Your notebook{% endblock %}
 {% block title %}{% if post %}Edit note{% else %}Create a new post{% endif %}{% endblock %}
+{% block description %}<p class="page-description">Make room for an idea. Published notes are visible to everyone.</p>{% endblock %}
 {% block content %}
 {{ form.media }}
-<form method="post">
+<form method="post" class="surface editor-surface">
     {% csrf_token %}
     {% include "form_fields.html" %}
-    <div class="note-actions">
-        <button type="submit" class="btn btn-primary">{% if post %}Save changes{% else %}Save{% endif %}</button>
-        <a href="{% if post %}{% url 'post-detail' post.pk %}{% else %}{% url 'home' %}{% endif %}">Cancel</a>
-    </div>
+    <div class="form-actions"><p>Your note will be public.</p><div class="note-actions"><a class="btn btn-light" href="{% if post %}{% url 'post-detail' post.pk %}{% else %}{% url 'home' %}{% endif %}">Cancel</a><button type="submit" class="btn btn-primary">{% if post %}Save changes{% else %}Save{% endif %}</button></div></div>
 </form>
 {% endblock %}

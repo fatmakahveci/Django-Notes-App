@@ -2,6 +2,8 @@ from datetime import datetime, timezone as datetime_timezone
 from math import ceil
 
 from django.conf import settings
+from django.contrib.auth import get_user_model
+from django.contrib.auth.forms import UsernameField
 from django.db.models import F
 from django.shortcuts import render
 from django.utils import timezone
@@ -29,7 +31,13 @@ class AuthenticationThrottleMiddleware(MiddlewareMixin):
             if identity_type == "ip":
                 identity = request.META.get("REMOTE_ADDR", "unknown")
             else:
-                identity = request.POST.get("username", "").strip().casefold()
+                user_model = get_user_model()
+                username_field = user_model._meta.get_field(user_model.USERNAME_FIELD)
+                # Match AuthenticationForm's bounded NFKC normalization, so
+                # equivalent Unicode spellings cannot get separate counters.
+                identity = UsernameField(max_length=username_field.max_length or 254).to_python(
+                    request.POST.get("username", ""),
+                ).casefold()
             window = int(now.timestamp()) // seconds
             expires_at = datetime.fromtimestamp((window + 1) * seconds, tz=datetime_timezone.utc)
             key = salted_hmac(

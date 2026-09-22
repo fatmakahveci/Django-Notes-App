@@ -1,6 +1,11 @@
 {% extends "base.html" %}
+{% block document_title %}Please try again later · Django Notes{% endblock %}
+{% block layout_class %}app-main-auth{% endblock %}
+{% block eyebrow %}A short pause{% endblock %}
 {% block title %}Please try again later{% endblock %}
 {% block content %}
-<p>Too many attempts. Please wait {{ retry_after }} seconds before trying again.</p>
-<a href="{% url 'home' %}">Back to notes</a>
+<div class="surface">
+    <p>Too many attempts. Please wait {{ retry_after }} seconds before trying again.</p>
+    <a href="{% url 'home' %}" class="btn btn-outline-primary">Back to notes</a>
+</div>
 {% endblock %}

@@ -1,46 +1,21 @@
 # Django Notes App
 
-[![Last commit](https://img.shields.io/github/last-commit/fatmakahveci/Django-Notes-App)](https://github.com/fatmakahveci/Django-Notes-App/commits/main)
 [![Python](https://img.shields.io/badge/Python-3-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![Django](https://img.shields.io/badge/Django-6.1-092E20?logo=django&logoColor=white)](https://www.djangoproject.com/)
 [![License](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE.md)
 
-A Django application for writing and sharing notes, with user accounts, optional categories, and a rich-text editor.
+A small Django app for writing notes and sharing them. Create an account, jot something down, and come back to edit it later. Categories and search help you find things as your collection grows.
 
-## Demo
+Notes are **public**. “My notes” brings your own posts together, but doesn't make them private. Only you can edit or delete your notes through the app; administrators can also manage them in Django admin.
 
-![Django Notes demo showing registration, note creation, category selection, and login/logout](demo.gif)
+The app uses Django 6.1, TinyMCE, Bootstrap 5.3.8, and SQLite. It works on desktop and mobile, with a searchable feed, category filters, and a separate page for each note.
 
-A 22-second walkthrough of creating an account, publishing a categorized note,
-and signing out and back in. The recording predates the current layout,
-search, pagination, and note-management features.
+## Run it locally
 
-## Features
-
-- Register, log in, and log out with Django authentication
-- Write notes with TinyMCE and optional categories
-- Read 400-character previews in a paginated feed and open full note details
-- Search titles and content, filter by category, and browse **My notes**
-- Edit or delete your own notes, with confirmation before deletion
-- Use consistent forms and a responsive desktop/mobile layout
-- Limit login and signup attempts with shared database counters
-- Run locally with SQLite or Docker Compose
-
-Built with **Python**, **Django 6.1**, **TinyMCE**, **Bootstrap 5.3.8**, and **SQLite**.
-
-## Getting Started
-
-### Prerequisites
-
-- Python 3.12 or newer (CI and Docker use Python 3.12)
-- pip
-
-### Installation
-
-Clone the repository and run all commands from its root directory:
+You'll need Python 3.12 or newer and pip. Copy this repository's clone URL from the **Code** menu, then replace `<repository-url>` below with it:
 
 ```bash
-git clone https://github.com/fatmakahveci/Django-Notes-App.git
+git clone <repository-url>
 cd Django-Notes-App
 python3 -m venv .venv
 source .venv/bin/activate
@@ -49,116 +24,78 @@ python my_site/manage.py migrate
 python my_site/manage.py runserver
 ```
 
-Open http://127.0.0.1:8000. The activation command above is for macOS/Linux;
-on Windows PowerShell, use `.venv\Scripts\Activate.ps1`.
+Open http://127.0.0.1:8000 and you're ready to go. On Windows PowerShell, replace the activation command with `.venv\Scripts\Activate.ps1`.
 
-### Updating an Existing Installation
+Already have a checkout? After pulling the latest code, activate your virtual environment, install the requirements again, and run `migrate`. If that environment still uses Python 3.11, recreate it with Python 3.12 or newer first.
 
-Django 6.1 requires Python 3.12 or newer. If your existing virtual environment
-uses Python 3.11, recreate it with a supported Python version first.
-After obtaining the latest code, activate your virtual environment and run from
-the repository root:
+## Write your first note
 
-```bash
-python -m pip install -r requirements.txt
-python my_site/manage.py migrate
-python my_site/manage.py runserver
-```
+Choose **Register** to create an account. You'll be signed in automatically. Then select **Create a new post**, add a title and some text, and hit **Save**. Categories are optional, so you can leave them unchecked.
 
-Migrations make categories optional, preserve full author names, and create
-authentication attempt counters. Migration `0011` backfills normalized search text
-for existing notes without changing their content. Previously truncated author names are restored
-when they match the linked account's first 20 characters; custom names are preserved.
+Your note will appear in the feed, newest first. Open its title or **Read note** to read it in full. On your own notes, you'll also see **Edit note** and **Delete note**; deleting asks you to confirm first.
 
-## Using the App
+Use **Search notes** and **Category** to find something, or **My notes** to see just your posts. The feed shows 10 notes per page and keeps your filters as you move between pages.
 
-1. Select **Register** to create an account; registration signs you in automatically.
-2. Select **Create a new post**, enter a title and visible text, and optionally choose categories.
-3. Select **Save** to publish. The feed shows 10 notes per page, newest first.
-4. Use **Search notes** and **Category**, then **Apply**, to narrow the list.
-   Search uses visible text, including decoded character entities, and ignores
-   HTML tags. Filters remain active when you select **Previous** or **Next**.
-5. Open a title or **Read note** to see the full note. Owners see **Edit note**
-   and **Delete note**. Deletion requires a separate confirmation.
-6. Select **My notes** to browse your own posts, or **Log out** to end your session.
+One detail about formatting: TinyMCE stores rich text, but the reading pages show plain text with paragraph and line breaks. Bold text and embedded images won't appear there. Feed previews stop at 400 characters; the note page shows the full text.
 
-**All published notes are public**, including those listed under **My notes**.
-Only the author can edit or delete a note through the application. Administrators
-can manage posts and categories through Django admin.
+### Add categories
 
-Create an administrator account from the repository root:
+Categories are managed in Django admin. Create an administrator account from the repository root:
 
 ```bash
 python my_site/manage.py createsuperuser
 ```
 
-Sign in at http://127.0.0.1:8000/admin/ to add categories. Categories are optional
-in both the note form and admin. Blank editor markup is rejected by the note form.
+Then sign in at http://127.0.0.1:8000/admin/ to add them. You can write notes without setting up any categories.
 
-The editor stores rich text. The feed and detail pages display escaped plain text
-with paragraph and line breaks; bold formatting and embedded images are not
-rendered. Feed previews are limited to 400 characters; details show the full text.
+## Prefer Docker?
 
-### Authentication Limits
-
-All login POST attempts, including successful attempts and admin logins, count
-against shared fixed windows: **20 per IP address and 10 per username every
-10 minutes**. Registration allows **5 attempts per IP address per hour**.
-Exceeding a limit returns HTTP 429 with a `Retry-After` header. GET requests and
-requests rejected by CSRF protection do not consume the quota.
-
-Counters live in the database, so they are shared across application processes.
-Expired counters are removed on subsequent authentication attempts. Limits are
-configured in `AUTH_ATTEMPT_LIMITS` in the Django settings. The application uses
-`REMOTE_ADDR`, not client-supplied forwarding headers; behind a reverse proxy,
-configure the trusted server layer to provide the actual client address.
-
-## Docker (Local Development)
-
-With Docker and its Compose plugin installed, run from the repository root:
+With Docker and its Compose plugin installed, run:
 
 ```bash
 docker compose up --build
 ```
 
-Open http://127.0.0.1:8000. Migrations run automatically and SQLite data persists
-in the `notes-data` volume at `/data/db.sqlite3`. This uses Django's development
-server. After code changes, run `docker compose up --build` again to rebuild
-the image.
+The app will be at http://127.0.0.1:8000. Migrations run on startup, and your SQLite database is kept in the `notes-data` volume at `/data/db.sqlite3`.
 
-To create an administrator while the service is running:
+To create an admin account while the container is running:
 
 ```bash
 docker compose exec web python manage.py createsuperuser
 ```
 
-Stop the service with `docker compose down`; the database volume is retained.
+Use `docker compose down` to stop it; your database stays in the volume. After changing the code, run `docker compose up --build` again. This setup uses Django's development server and is intended for local use.
 
-## Configuration
+## Settings
 
-Settings read environment variables from the process; `.env` is not loaded automatically.
-For Docker, configure variables in the Compose service's `environment` section.
+The app reads these environment variables directly. [.env.example](.env.example) lists them with setup notes; it doesn't load a `.env` file automatically. For Docker, set them in the Compose service's `environment` section.
 
-| Variable | Default | Purpose |
+| Variable | Default | What it controls |
 | --- | --- | --- |
 | `DJANGO_DEBUG` | `true` | Development mode |
 | `DJANGO_SECRET_KEY` | Development-only key | Required when debug is disabled |
 | `DJANGO_ALLOWED_HOSTS` | `localhost,127.0.0.1` | Comma-separated hostnames |
-| `DJANGO_DATABASE_PATH` | `my_site/db.sqlite3` | SQLite database path |
+| `DJANGO_DATABASE_PATH` | `my_site/db.sqlite3` | SQLite database location |
 
-For production, set `DJANGO_DEBUG=false`, provide a private secret key and allowed
-hosts, configure HTTPS and a production WSGI/ASGI server, and serve the output of
-`python my_site/manage.py collectstatic`. Secure cookies and HTTPS redirects are
-enabled when debug is disabled. Validate your production configuration with its
-environment variables set:
+For a production deployment, set `DJANGO_DEBUG=false`, supply a private secret key and your allowed hosts, and configure HTTPS. Use a production WSGI/ASGI server and serve the static files collected by `python my_site/manage.py collectstatic`. Turning debug off also enables secure cookies and HTTPS redirects.
+
+With your production environment variables set, check the configuration with:
 
 ```bash
 python my_site/manage.py check --deploy
 ```
 
-## Quality Checks
+### Login and signup limits
 
-Run from the repository root with the virtual environment activated:
+Login attempts are limited to 20 per IP address and 10 per username every 10 minutes. This includes successful logins and Django admin logins. Signup allows 5 attempts per IP address per hour. Once a limit is reached, the app returns HTTP 429 with a `Retry-After` header.
+
+The counters are stored in the database so they work across app processes. You can change the limits in `AUTH_ATTEMPT_LIMITS` in the Django settings. GET requests and requests rejected by CSRF protection don't count.
+
+If you're running behind a reverse proxy, configure the trusted server layer to pass along the real client address. The app uses `REMOTE_ADDR` rather than trusting forwarding headers from the client.
+
+## Working on the code
+
+With your virtual environment active, run these from the repository root:
 
 ```bash
 python my_site/manage.py check
@@ -166,41 +103,23 @@ python my_site/manage.py makemigrations --check --dry-run
 python my_site/manage.py test blog_app
 ```
 
-Tests cover authentication, CSRF, ownership checks, editing/deletion, text
-rendering, filtering, pagination, migration, and authentication limits.
+The tests cover signing in, ownership permissions, editing and deletion, search, pagination, text rendering, migrations, CSRF, and authentication limits.
 
-To run the Python dependency vulnerability scan:
+To check Python dependencies for known vulnerabilities:
 
 ```bash
 python -m pip install -r requirements-dev.txt
 python -m pip_audit --strict -r requirements.txt
 ```
 
-CI runs tests and migration checks, builds and tests the Docker image, collects
-static files, and audits Python dependencies on pushes and pull requests to `main`.
-The audit checks known advisories for Python packages; it does not audit bundled
-JavaScript. Dependabot monitors application and development requirements.
+CI runs these checks on pushes and pull requests to `main`, along with Docker tests and static file collection. The dependency audit covers Python packages, not bundled JavaScript. Dependabot checks the application and development requirements for updates.
 
-## Repository Structure
+The editor uses a local copy of TinyMCE 7.9.3 because the Django package bundles an older version. Its [source and update notes](my_site/static/vendor/tinymce-7.9.3/UPSTREAM.md) explain how to keep it patched.
 
-```text
-Django-Notes-App/
-├── demo.gif                 # Application walkthrough
-├── docker-compose.yml      # Local Docker setup
-├── requirements.txt        # Application dependency entry point
-├── requirements-dev.txt    # Development and audit tooling
-├── SECURITY.md             # Security policy
-└── my_site/
-    ├── manage.py           # Django management commands
-    ├── blog_app/           # Models, forms, views, tests, and migrations
-    ├── my_site/            # Settings and root URL configuration
-    ├── static/             # Styles and static assets
-    └── templates/          # Server-rendered pages
-```
+Most of the app code lives in `my_site/blog_app/`. Page templates are in `my_site/templates/`, styles and other assets are in `my_site/static/`, and Django settings are in `my_site/my_site/`.
 
-## Project Resources
+For more detail, see the [contributing guide](.github/CONTRIBUTING.md) and [changelog](CHANGELOG.md). To report a security issue, follow the [security policy](SECURITY.md).
 
-- [Changelog](CHANGELOG.md)
-- [Contributing guide](.github/CONTRIBUTING.md)
-- [Security policy](SECURITY.md)
-- [License](LICENSE.md)
+## License
+
+[Apache 2.0](LICENSE.md).

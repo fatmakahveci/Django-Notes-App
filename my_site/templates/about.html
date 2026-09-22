@@ -1,6 +1,13 @@
 {% extends "base.html" %}
+{% block document_title %}About · Django Notes{% endblock %}
+{% block layout_class %}app-main-reading{% endblock %}
+{% block eyebrow %}Small ideas, shared{% endblock %}
 {% block title %}About Django Notes{% endblock %}
+{% block description %}<p class="page-description">A simple place to write, organize, and come back to your ideas.</p>{% endblock %}
 {% block content %}
-<p>A shared space for writing notes and organizing them with categories.</p>
-<p>Create an account to publish your notes. All published notes are visible to everyone.</p>
+<div class="surface reading-surface note-body">
+    <p>Collect a useful discovery, a work-in-progress thought, or something you want to remember. Give it a title, choose a category, and share it with the notebook.</p>
+    <p>All published notes are visible to everyone. Create an account to write your own, and use My notes to find, edit, or remove what you have shared.</p>
+    <a class="btn btn-primary" href="{% url 'home' %}">Explore the notes</a>
+</div>
 {% endblock %}

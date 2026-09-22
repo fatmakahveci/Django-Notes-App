@@ -1,6 +1,5 @@
 from django.contrib.auth.models import User
 from django.db import models
-
 from tinymce import models as tinymce_models
 
 from .text import search_document
@@ -13,11 +12,13 @@ class Author(models.Model):
     def __str__(self):
         return self.user_name
 
+
 class Category(models.Model):
     title = models.CharField(max_length=100)
 
     def __str__(self):
         return self.title
+
 
 class Post(models.Model):
     title = models.CharField(max_length=100)
@@ -26,9 +27,9 @@ class Post(models.Model):
     search_text = models.TextField(default="", blank=True, editable=False)
     categories = models.ManyToManyField(Category, blank=True)
     publish_time = models.DateTimeField(auto_now_add=True)
-    
+
     class Meta:
-        ordering = ['-publish_time']
+        ordering = ["-publish_time"]
 
     def save(self, *args, **kwargs):
         update_fields = kwargs.get("update_fields")

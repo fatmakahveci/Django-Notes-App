@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block document_title %}Confirm changes · Django Notes{% endblock %}
+{% block title %}{% if action == 'publish' %}Publish selected notes?{% else %}Move selected notes to Trash?{% endif %}{% endblock %}
+{% block content %}
+<div class="surface">
+<p>{% if action == 'publish' %}Anyone will be able to read these notes.{% else %}These notes will be hidden. You can restore them from Trash.{% endif %}</p>
+<ul>{% for post in posts %}<li>{{ post.title }}</li>{% endfor %}</ul>
+<form method="post" action="{% url 'bulk-notes' %}" class="note-actions">
+{% csrf_token %}<input type="hidden" name="action" value="{{ action }}"><input type="hidden" name="confirm" value="yes">
+{% for post in posts %}<input type="hidden" name="notes" value="{{ post.pk }}">{% endfor %}
+<button class="btn btn-primary">{% if action == 'publish' %}Publish notes{% else %}Move to Trash{% endif %}</button>
+<a class="btn btn-light" href="{% url 'my-notes' %}">Cancel</a>
+</form>
+</div>
+{% endblock %}

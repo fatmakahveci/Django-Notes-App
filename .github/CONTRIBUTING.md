@@ -26,7 +26,7 @@ and the whitespace settings in `.editorconfig`. Update tests when behavior chang
 and update the README when setup or usage changes.
 
 Database changes need a migration. Do not edit migrations that have already been
-released. Third-party files under `my_site/static/vendor/` should remain unmodified;
+released. Third-party files under `src/static/vendor/` should remain unmodified;
 follow their upstream update notes when replacing them.
 
 ## Check your work
@@ -43,12 +43,23 @@ the same script for the application checks.
 
 The project does not currently configure a separate linter or type checker.
 
+For recovery, collection, and file-transfer changes, you can also run the
+focused regression tests:
+
+```bash
+python src/manage.py test notes.tests.test_notebook_boundaries notes.tests.test_transfer
+```
+
+These cover stale editor tabs, account isolation, bulk-operation rollback,
+version restoration, malformed archives, and UTF-8 size limits. Tests use a
+temporary database and synthetic uploads; they do not modify your local notes.
+
 For Docker changes, also validate and build the image:
 
 ```bash
 docker compose config --quiet
-docker build -f my_site/blog_app/Dockerfile -t django-notes:local .
-docker run --rm django-notes:local python manage.py test blog_app
+docker build -f Dockerfile -t django-notes:local .
+docker run --rm django-notes:local python manage.py test notes
 ```
 
 For interface changes, run the browser regression test:

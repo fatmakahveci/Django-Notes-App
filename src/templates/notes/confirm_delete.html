@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block document_title %}Delete note · Django Notes{% endblock %}
+{% block layout_class %}app-main-reading{% endblock %}
+{% block eyebrow %}Manage your note{% endblock %}
+{% block title %}Delete note{% endblock %}
+{% block description %}<p class="page-description">Take a moment before turning this page.</p>{% endblock %}
+{% block content %}
+<div class="surface">
+    <p>Delete “<strong>{{ post.title }}</strong>”? You can restore it from Trash.</p>
+    <form method="post" class="note-actions">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Move to Trash</button>
+        <a href="{% url 'post-detail' post.pk %}" class="btn btn-light">Cancel</a>
+    </form>
+</div>
+{% endblock %}

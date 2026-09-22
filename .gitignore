@@ -5,8 +5,8 @@ __pycache__/
 venv/
 env/
 .python-version
-/my_site/bin/
-/my_site/pyvenv.cfg
+/src/bin/
+/src/pyvenv.cfg
 
 # Local configuration (keep shareable examples)
 .env

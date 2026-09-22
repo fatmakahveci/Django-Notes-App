@@ -35,10 +35,23 @@ jobs:
       - name: Validate Compose and build image
         run: |
           docker compose config --quiet
-          docker build -f my_site/blog_app/Dockerfile -t django-notes:ci .
+          docker compose --project-name notes-ci build
       - name: Verify container
         run: |
-          docker run --rm django-notes:ci sh -c 'python manage.py check && python manage.py migrate --noinput && python manage.py test blog_app && python manage.py collectstatic --noinput --verbosity 0'
+          docker compose --project-name notes-ci run --rm web sh -c 'python manage.py check && python manage.py migrate --noinput && python manage.py test notes && python manage.py collectstatic --noinput --verbosity 0'
+      - name: Verify startup and HTTP assets
+        run: |
+          docker compose --project-name notes-ci up --detach --wait --wait-timeout 120
+          curl --fail --silent --show-error http://127.0.0.1:8000/health/
+          curl --fail --silent --show-error --output /dev/null http://127.0.0.1:8000/
+          curl --fail --silent --show-error --output /dev/null http://127.0.0.1:8000/static/css/site.css
+          curl --fail --silent --show-error --output /dev/null http://127.0.0.1:8000/static/vendor/tinymce-7.9.3/tinymce.min.js
+      - name: Show container logs on failure
+        if: failure()
+        run: docker compose --project-name notes-ci logs --no-color
+      - name: Remove CI containers and volumes
+        if: always()
+        run: docker compose --project-name notes-ci down --volumes
 
   dependency-audit:
     timeout-minutes: 15
@@ -53,6 +66,14 @@ jobs:
         run: python -m pip install -r requirements-dev.txt
       - name: Audit Python dependencies
         run: python -m pip_audit --strict -r requirements-dev.txt
+
+  production:
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Verify production HTTPS and security settings
+        run: python3 scripts/test_production.py
 
   browser:
     timeout-minutes: 15

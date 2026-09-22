@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% load note_text %}
+{% block document_title %}Version history · Django Notes{% endblock %}
+{% block title %}Version history{% endblock %}
+{% block description %}<p class="page-description">{{ post.title }} · The latest 50 previous saved versions. Restoring keeps a copy of the current version.</p>{% endblock %}
+{% block content %}
+<p><a href="{% url 'post-detail' post.pk %}">← Back to note</a></p>
+{% for revision in revisions %}
+<article class="surface mb-3">
+<h2 class="h4">{{ revision.data.title }}</h2>
+<p><time datetime="{{ revision.created_at|date:'c' }}">{{ revision.created_at|date:"M d, Y H:i:s" }}</time></p>
+<details><summary>Preview this version</summary><div class="note-body">{{ revision.data.content|formatted_note }}</div></details>
+<form method="post" class="mt-3">
+{% csrf_token %}<input type="hidden" name="revision" value="{{ revision.pk }}"><input type="hidden" name="note_version" value="{{ post.version }}">
+<button class="btn btn-outline-primary">Restore as draft<span class="visually-hidden">: version {{ revision.pk }}</span></button>
+</form>
+</article>
+{% empty %}<p>No previous versions yet. Editing and saving this note will keep a copy here.</p>{% endfor %}
+<nav class="notes-pagination" aria-label="History pages">
+{% if revisions.has_previous %}<a href="?page={{ revisions.previous_page_number }}">Previous</a>{% endif %}
+<span>Page {{ revisions.number }} of {{ revisions.paginator.num_pages }}</span>
+{% if revisions.has_next %}<a href="?page={{ revisions.next_page_number }}">Next</a>{% endif %}
+</nav>
+{% endblock %}

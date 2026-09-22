@@ -12,9 +12,9 @@ def main():
     args = parser.parse_args()
     root = Path(__file__).resolve().parent.parent
     commands = [
-        ["my_site/manage.py", "check"],
-        ["my_site/manage.py", "makemigrations", "--check", "--dry-run"],
-        ["my_site/manage.py", "test", "blog_app"],
+        ["src/manage.py", "check"],
+        ["src/manage.py", "makemigrations", "--check", "--dry-run"],
+        ["src/manage.py", "test", "notes"],
     ]
     if args.audit:
         commands.append([

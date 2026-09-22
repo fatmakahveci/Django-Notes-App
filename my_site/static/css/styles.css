@@ -5,3 +5,64 @@
     align-items: center;
     background-color: #5ebec4;
 }
+
+.content {
+    width: calc(100% - 2rem);
+    max-width: 50rem;
+    margin-inline: auto;
+}
+
+.content hr {
+    border-color: #5ebec4;
+}
+
+.content input,
+.content select,
+.content textarea {
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.content .tox-tinymce {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+}
+
+.notes-pagination {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem;
+    margin-block: 1.5rem;
+}
+
+.note-filters {
+    display: flex;
+    align-items: end;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-block: 1.5rem;
+}
+
+.note-filters > div {
+    flex: 1 1 14rem;
+    min-width: 0;
+}
+
+.note-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-block: 1rem;
+}
+
+.errorlist {
+    padding-left: 1.25rem;
+    margin-block: 0.5rem;
+}
+
+.form-label {
+    font-weight: 600;
+}

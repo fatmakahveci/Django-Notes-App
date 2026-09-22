@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block title %}Please try again later{% endblock %}
+{% block content %}
+<p>Too many attempts. Please wait {{ retry_after }} seconds before trying again.</p>
+<a href="{% url 'home' %}">Back to notes</a>
+{% endblock %}

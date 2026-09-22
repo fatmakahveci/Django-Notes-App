@@ -1,9 +1,16 @@
 {% extends "base.html" %}
+{% block document_title %}Create an account · Django Notes{% endblock %}
+{% block layout_class %}app-main-auth{% endblock %}
+{% block eyebrow %}A fresh page{% endblock %}
 {% block title %}Create an account{% endblock %}
+{% block description %}<p class="page-description">Start a collection of ideas worth sharing.</p>{% endblock %}
 {% block content %}
-<form method="post">
-    {% csrf_token %}
-    {% include "form_fields.html" %}
-    <button type="submit" class="btn btn-primary">Register</button>
-</form>
+<div class="surface auth-surface">
+    <form method="post">
+        {% csrf_token %}
+        {% include "form_fields.html" %}
+        <button type="submit" class="btn btn-primary auth-submit">Register</button>
+    </form>
+    <p class="auth-switch">Already have an account? <a href="{% url 'login' %}">Log in</a></p>
+</div>
 {% endblock %}

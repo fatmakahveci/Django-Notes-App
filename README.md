@@ -2,7 +2,7 @@
 
 [![Last commit](https://img.shields.io/github/last-commit/fatmakahveci/Django-Notes-App)](https://github.com/fatmakahveci/Django-Notes-App/commits/main)
 [![Python](https://img.shields.io/badge/Python-3-3776AB?logo=python&logoColor=white)](https://www.python.org/)
-[![Django](https://img.shields.io/badge/Django-5.2-092E20?logo=django&logoColor=white)](https://www.djangoproject.com/)
+[![Django](https://img.shields.io/badge/Django-6.1-092E20?logo=django&logoColor=white)](https://www.djangoproject.com/)
 [![License](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE.md)
 
 A Django application for writing and sharing notes, with user accounts, optional categories, and a rich-text editor.
@@ -26,13 +26,13 @@ search, pagination, and note-management features.
 - Limit login and signup attempts with shared database counters
 - Run locally with SQLite or Docker Compose
 
-Built with **Python**, **Django 5.2 LTS**, **TinyMCE**, **Bootstrap 5.3.8**, and **SQLite**.
+Built with **Python**, **Django 6.1**, **TinyMCE**, **Bootstrap 5.3.8**, and **SQLite**.
 
 ## Getting Started
 
 ### Prerequisites
 
-- Python 3.11 or newer (CI and Docker use Python 3.12)
+- Python 3.12 or newer (CI and Docker use Python 3.12)
 - pip
 
 ### Installation
@@ -54,6 +54,8 @@ on Windows PowerShell, use `.venv\Scripts\Activate.ps1`.
 
 ### Updating an Existing Installation
 
+Django 6.1 requires Python 3.12 or newer. If your existing virtual environment
+uses Python 3.11, recreate it with a supported Python version first.
 After obtaining the latest code, activate your virtual environment and run from
 the repository root:
 

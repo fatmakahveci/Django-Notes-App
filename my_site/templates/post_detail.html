@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% load note_text %}
+{% block title %}{{ post.title }}{% endblock %}
+{% block content %}
+<article>
+    <p class="text-secondary">Published on {{ post.publish_time|date:"M d, Y" }} by {{ post.author }}</p>
+    <div>{{ post.content|note_text|linebreaks }}</div>
+    <p>{% for category in post.categories.all %}<span class="badge bg-secondary">{{ category }}</span> {% endfor %}</p>
+</article>
+<div class="note-actions">
+    <a href="{% url 'home' %}">All notes</a>
+    {% if user.is_authenticated and post.author.user_id == user.pk %}
+    <a href="{% url 'post-edit' post.pk %}" class="btn btn-primary">Edit note</a>
+    <a href="{% url 'post-delete' post.pk %}" class="btn btn-outline-danger">Delete note</a>
+    {% endif %}
+</div>
+{% endblock %}

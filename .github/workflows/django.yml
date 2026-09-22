@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   test:
-    timeout-minutes: 60
+    timeout-minutes: 15
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -30,3 +30,30 @@ jobs:
           python manage.py check
           python manage.py makemigrations --check --dry-run
           python manage.py test
+
+  docker:
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Validate Compose and build image
+        run: |
+          docker compose config --quiet
+          docker build -f my_site/blog_app/Dockerfile -t django-notes:ci .
+      - name: Verify container
+        run: |
+          docker run --rm django-notes:ci sh -c 'python manage.py check && python manage.py migrate --noinput && python manage.py test blog_app && python manage.py collectstatic --noinput --verbosity 0'
+
+  dependency-audit:
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install audit tooling
+        run: python -m pip install -r requirements-dev.txt
+      - name: Audit Python dependencies
+        run: python -m pip_audit --strict -r requirements.txt

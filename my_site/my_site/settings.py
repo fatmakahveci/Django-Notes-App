@@ -50,6 +50,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'blog_app.middleware.AuthenticationThrottleMiddleware',
 ]
 
 ROOT_URLCONF = 'my_site.urls'
@@ -131,3 +132,9 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 LOGIN_URL = "login"
 LOGIN_REDIRECT_URL = "home"
 LOGOUT_REDIRECT_URL = "home"
+
+# Fixed windows, shared by public and admin login. All POST attempts count.
+AUTH_ATTEMPT_LIMITS = {
+    "login": [("ip", 20, 600), ("username", 10, 600)],
+    "signup": [("ip", 5, 3600)],
+}

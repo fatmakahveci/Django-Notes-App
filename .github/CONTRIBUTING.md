@@ -9,7 +9,7 @@ documentation improvements, tests, and well-scoped features are welcome.
 - Open an issue before starting a large or breaking change so the approach can
   be discussed first.
 - Report security vulnerabilities privately by following the
-  [security policy](SECURITY.md).
+  [security policy](../SECURITY.md).
 
 ## Development Workflow
 
@@ -20,9 +20,27 @@ documentation improvements, tests, and well-scoped features are welcome.
 5. Run the available lint, type-check, test, and build commands before opening
    a pull request.
 
-Use a short, descriptive branch name such as `fix/cart-total` or
-`feat/product-filter`. Write clear commit messages in the imperative mood and
+Use a short, descriptive branch name such as `fix/note-preview` or
+`feat/note-search`. Write clear commit messages in the imperative mood and
 avoid mixing unrelated changes in one commit.
+
+## Local Checks
+
+From the repository root, with your virtual environment activated:
+
+```bash
+python -m pip install -r requirements-dev.txt
+python my_site/manage.py check
+python my_site/manage.py makemigrations --check --dry-run
+python my_site/manage.py test blog_app
+python -m pip_audit --strict -r requirements.txt
+```
+
+For Docker changes, also run `docker compose config --quiet` and
+`docker build -f my_site/blog_app/Dockerfile -t django-notes:local .`.
+For UI changes, verify mobile navigation, forms, and note actions at narrow and
+wide viewport sizes. Permission changes need tests for both the author and
+another signed-in user, including direct POST requests.
 
 ## Pull Requests
 

@@ -68,7 +68,7 @@ Use `docker compose down` to stop it; your database stays in the volume. After c
 
 ## Settings
 
-The app reads these environment variables directly. It doesn't load a `.env` file automatically. For Docker, set them in the Compose service's `environment` section.
+The app reads these environment variables directly. [.env.example](.env.example) lists them with setup notes; it doesn't load a `.env` file automatically. For Docker, set them in the Compose service's `environment` section.
 
 | Variable | Default | What it controls |
 | --- | --- | --- |

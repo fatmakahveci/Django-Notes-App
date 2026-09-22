@@ -133,7 +133,6 @@ h1 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; font-size
 .site-footer { border-top: 1px solid var(--border); margin-top: auto; color: var(--muted); }
 .site-footer > div { display: flex; align-items: center; gap: 1.2rem; max-width: 1120px; width: calc(100% - 4rem); margin: auto; padding: 1.5rem 0; font-size: .75rem; }
 .footer-brand { color: var(--ink); font-weight: 650; }
-.footer-credit { margin-left: auto; }
 
 @media (max-width: 991.98px) {
     .site-nav { min-height: 76px; }

@@ -4,11 +4,19 @@
 [![Django](https://img.shields.io/badge/Django-6.1-092E20?logo=django&logoColor=white)](https://www.djangoproject.com/)
 [![License](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE.md)
 
-A small Django app for writing notes and sharing them. Create an account, jot something down, and come back to edit it later. Categories and search help you find things as your collection grows.
+A place for ideas you want to come back to. Write a quick note, keep it as a draft, or publish it for others to read. Search and categories help you find it again.
 
-**Published notes are public.** Choose **Draft** in the visibility field to keep a note visible only to you and administrators. “My notes” collects both your drafts and published posts. Only you can edit or delete your notes through the app; administrators can also manage them in Django admin.
+**New notes are public by default.** Choose **Draft** before saving to keep a note visible only to you and site administrators. Other users cannot edit or delete your notes.
 
-The app uses Django 6.1, TinyMCE, Bootstrap 5.3.8, and SQLite. It works on desktop and mobile, with a searchable feed, category filters, and a separate page for each note.
+Built with Django, TinyMCE, Bootstrap, and SQLite, with layouts for desktop and mobile.
+
+## Demo
+
+A quick look at writing a note, saving it as a private draft, and publishing it when it's ready. The recording uses sample notes and a demo account.
+
+![Writing a note, saving a draft, publishing it, and finding it with search](demo.gif)
+
+[Open the demo GIF](demo.gif) if the preview doesn't load.
 
 ## Run it locally
 
@@ -30,17 +38,24 @@ Already have a checkout? After pulling the latest code, activate your virtual en
 
 ## Write your first note
 
-Choose **Register** to create an account. You'll be signed in automatically. Then select **Create a new post**, add a title and some text, and choose a visibility. New notes default to **Published**; choose **Draft** to keep writing privately. Hit **Save** when ready. Categories are optional, so you can leave them unchecked.
+1. Choose **Register** to create an account. You'll be signed in automatically.
+2. Select **Create a new post** and add a title and some text. Categories are optional.
+3. Choose **Draft** to keep working privately, or **Published** to let anyone read it.
+4. Hit **Save**. You can return to the note through **My notes**.
 
-Published notes appear in the public feed. Drafts appear only in **My notes**. To publish a draft, edit it, change its visibility to **Published**, and save. Open its title or **Read note** to read it in full. On your own notes, you'll also see **Edit note** and **Delete note**; deleting asks you to confirm first.
+To publish a draft, open it, choose **Edit note**, change its visibility to **Published**, and save. You can also switch a published note back to Draft. **Delete note** asks for confirmation before removing it.
 
-Use **Search notes** and **Category** to find something, or **My notes** to see just your posts. Sort by newest, oldest, or title, and click a category label to filter the list. **My notes** also lets you show just drafts or published notes. The feed shows 10 notes per page and keeps your filters and sort order as you move between pages.
+### Find and reuse your notes
 
-One detail about formatting: TinyMCE stores rich text, but the reading pages show plain text with paragraph and line breaks. Bold text and embedded images won't appear there. Feed previews stop at 400 characters; the note page shows the full text.
+Search by title or text, filter by category, and sort by newest, oldest, or title. **My notes** brings your writing together, with tabs for drafts and published notes. Filters stay in place as you move between pages.
+
+Open a note to **Copy text**, **Download .txt**, or **Print** it. Copy needs browser clipboard permission; downloading works without JavaScript. Draft pages and downloads are available only to their owner through the app.
+
+### A few things to know about the editor
+
+Reading pages show plain text with paragraph and line breaks. Bold text and embedded images from the editor won't appear there.
 
 The editor shows a word count and warns before you leave with unsaved changes. Press **Ctrl+Enter** (or **⌘+Enter** on macOS) to save. These helpers need JavaScript; the forms also work without it. Unsaved text stays in the current page and is not backed up automatically.
-
-On a note page, use **Copy text**, **Download .txt**, or **Print** to take your writing elsewhere. Copy needs clipboard permission and a secure browser context; downloading works without JavaScript. Draft downloads use the same owner check as draft pages.
 
 ### Add categories
 
@@ -107,14 +122,14 @@ If you're running behind a reverse proxy, configure the trusted server layer to 
 
 ## Working on the code
 
-Dependencies are split by purpose; the optional files include the application
-requirements automatically.
+Use `requirements.txt` to run the app, or `requirements-dev.txt` to work on it.
+The development file includes the application requirements, so you only need
+one install command. Playwright's browser is a separate, optional download.
 
 | File | Installs |
 | --- | --- |
 | `requirements.txt` | Django and the editor integration |
-| `requirements-dev.txt` | Application dependencies and `pip-audit` |
-| `requirements-browser.txt` | Application dependencies and Playwright |
+| `requirements-dev.txt` | Application dependencies, `pip-audit`, and Playwright |
 
 With your virtual environment active, run these from the repository root:
 
@@ -146,7 +161,7 @@ The editor uses a local copy of TinyMCE 7.9.3 because the Django package bundles
 The writing workflow also has a browser test, using a temporary test database:
 
 ```bash
-python -m pip install -r requirements-browser.txt
+python -m pip install -r requirements-dev.txt
 python -m playwright install chromium
 python scripts/test_browser.py
 ```

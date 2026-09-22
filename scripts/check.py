@@ -19,7 +19,7 @@ def main():
     if args.audit:
         commands.append([
             "-m", "pip_audit", "--strict",
-            "-r", "requirements-dev.txt", "-r", "requirements-browser.txt",
+            "-r", "requirements-dev.txt",
         ])
     for command in commands:
         print(f"Running: python {' '.join(command)}", flush=True)

@@ -6,6 +6,7 @@ def restore_author_names(apps, schema_editor):
     authors = Author.objects.using(schema_editor.connection.alias)
     for author in authors.select_related("user").iterator():
         username = author.user.username
+        # Restore only names matching the old truncation rule; preserve custom names.
         if len(username) > 20 and author.user_name == username[:20]:
             authors.filter(pk=author.pk).update(user_name=username)
 

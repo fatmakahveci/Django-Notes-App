@@ -10,6 +10,7 @@ from blog_app.text import search_document
 def populate_search_text(apps, schema_editor):
     Post = apps.get_model("blog_app", "Post")
     posts = Post.objects.using(schema_editor.connection.alias)
+    # Bound memory use while backfilling existing notes; leave their content unchanged.
     rows = posts.only("pk", "title", "content").iterator(chunk_size=500)
     while batch := list(islice(rows, 500)):
         for post in batch:

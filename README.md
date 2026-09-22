@@ -6,7 +6,7 @@
 
 A small Django app for writing notes and sharing them. Create an account, jot something down, and come back to edit it later. Categories and search help you find things as your collection grows.
 
-Notes are **public**. “My notes” brings your own posts together, but doesn't make them private. Only you can edit or delete your notes through the app; administrators can also manage them in Django admin.
+**Published notes are public.** Choose **Draft** in the visibility field to keep a note visible only to you and administrators. “My notes” collects both your drafts and published posts. Only you can edit or delete your notes through the app; administrators can also manage them in Django admin.
 
 The app uses Django 6.1, TinyMCE, Bootstrap 5.3.8, and SQLite. It works on desktop and mobile, with a searchable feed, category filters, and a separate page for each note.
 
@@ -26,17 +26,21 @@ python my_site/manage.py runserver
 
 Open http://127.0.0.1:8000 and you're ready to go. On Windows PowerShell, replace the activation command with `.venv\Scripts\Activate.ps1`.
 
-Already have a checkout? After pulling the latest code, activate your virtual environment, install the requirements again, and run `migrate`. If that environment still uses Python 3.11, recreate it with Python 3.12 or newer first.
+Already have a checkout? After pulling the latest code, activate your virtual environment, install the requirements again, and run `migrate`. Migration `0012` adds drafts while keeping existing notes published. If that environment still uses Python 3.11, recreate it with Python 3.12 or newer first.
 
 ## Write your first note
 
-Choose **Register** to create an account. You'll be signed in automatically. Then select **Create a new post**, add a title and some text, and hit **Save**. Categories are optional, so you can leave them unchecked.
+Choose **Register** to create an account. You'll be signed in automatically. Then select **Create a new post**, add a title and some text, and choose a visibility. New notes default to **Published**; choose **Draft** to keep writing privately. Hit **Save** when ready. Categories are optional, so you can leave them unchecked.
 
-Your note will appear in the feed, newest first. Open its title or **Read note** to read it in full. On your own notes, you'll also see **Edit note** and **Delete note**; deleting asks you to confirm first.
+Published notes appear in the public feed. Drafts appear only in **My notes**. To publish a draft, edit it, change its visibility to **Published**, and save. Open its title or **Read note** to read it in full. On your own notes, you'll also see **Edit note** and **Delete note**; deleting asks you to confirm first.
 
-Use **Search notes** and **Category** to find something, or **My notes** to see just your posts. The feed shows 10 notes per page and keeps your filters as you move between pages.
+Use **Search notes** and **Category** to find something, or **My notes** to see just your posts. Sort by newest, oldest, or title, and click a category label to filter the list. **My notes** also lets you show just drafts or published notes. The feed shows 10 notes per page and keeps your filters and sort order as you move between pages.
 
 One detail about formatting: TinyMCE stores rich text, but the reading pages show plain text with paragraph and line breaks. Bold text and embedded images won't appear there. Feed previews stop at 400 characters; the note page shows the full text.
+
+The editor shows a word count and warns before you leave with unsaved changes. Press **Ctrl+Enter** (or **⌘+Enter** on macOS) to save. These helpers need JavaScript; the forms also work without it. Unsaved text stays in the current page and is not backed up automatically.
+
+On a note page, use **Copy text**, **Download .txt**, or **Print** to take your writing elsewhere. Copy needs clipboard permission and a secure browser context; downloading works without JavaScript. Draft downloads use the same owner check as draft pages.
 
 ### Add categories
 
@@ -65,6 +69,14 @@ docker compose exec web python manage.py createsuperuser
 ```
 
 Use `docker compose down` to stop it; your database stays in the volume. After changing the code, run `docker compose up --build` again. This setup uses Django's development server and is intended for local use.
+
+Compose checks the app's health automatically. Run `docker compose ps` to see
+whether the service is healthy. The `/health/` endpoint returns HTTP 200 with
+`{"status": "ok"}` when the notes table can be read, or HTTP 503 when the database
+or table is unavailable. It returns no note or account data and is not cached.
+This is a database readiness check, not a complete check of external services or
+pending migrations. A failed check marks the container unhealthy; it does not
+restart it automatically.
 
 ## Settings
 
@@ -95,13 +107,24 @@ If you're running behind a reverse proxy, configure the trusted server layer to 
 
 ## Working on the code
 
+Dependencies are split by purpose; the optional files include the application
+requirements automatically.
+
+| File | Installs |
+| --- | --- |
+| `requirements.txt` | Django and the editor integration |
+| `requirements-dev.txt` | Application dependencies and `pip-audit` |
+| `requirements-browser.txt` | Application dependencies and Playwright |
+
 With your virtual environment active, run these from the repository root:
 
 ```bash
-python my_site/manage.py check
-python my_site/manage.py makemigrations --check --dry-run
-python my_site/manage.py test blog_app
+python scripts/check.py
 ```
+
+This runs Django's system checks, checks for missing migrations, and runs the
+application tests. It stops at the first failure and uses your active Python
+environment. CI uses the same command.
 
 The tests cover signing in, ownership permissions, editing and deletion, search, pagination, text rendering, migrations, CSRF, and authentication limits.
 
@@ -109,12 +132,27 @@ To check Python dependencies for known vulnerabilities:
 
 ```bash
 python -m pip install -r requirements-dev.txt
-python -m pip_audit --strict -r requirements.txt
+python scripts/check.py --audit
 ```
+
+The optional audit covers application, development, and browser-test dependencies
+and needs network access. You can still run individual Django
+commands through `python my_site/manage.py` when working on a specific test.
 
 CI runs these checks on pushes and pull requests to `main`, along with Docker tests and static file collection. The dependency audit covers Python packages, not bundled JavaScript. Dependabot checks the application and development requirements for updates.
 
 The editor uses a local copy of TinyMCE 7.9.3 because the Django package bundles an older version. Its [source and update notes](my_site/static/vendor/tinymce-7.9.3/UPSTREAM.md) explain how to keep it patched.
+
+The writing workflow also has a browser test, using a temporary test database:
+
+```bash
+python -m pip install -r requirements-browser.txt
+python -m playwright install chromium
+python scripts/test_browser.py
+```
+
+CI runs it in Chromium. It covers draft privacy, publishing, unsaved-change warnings,
+keyboard saving, downloads, clipboard feedback, print layout, and mobile sizing.
 
 Most of the app code lives in `my_site/blog_app/`. Page templates are in `my_site/templates/`, styles and other assets are in `my_site/static/`, and Django settings are in `my_site/my_site/`.
 

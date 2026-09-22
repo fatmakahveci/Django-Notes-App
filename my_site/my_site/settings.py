@@ -50,6 +50,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # Run after CSRF checks so rejected submissions do not consume login quotas.
     'blog_app.middleware.AuthenticationThrottleMiddleware',
 ]
 
@@ -138,6 +139,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_URL = "login"
 LOGIN_REDIRECT_URL = "home"
 LOGOUT_REDIRECT_URL = "home"
+CSRF_FAILURE_VIEW = "blog_app.operations.csrf_failure"
 
 # Fixed windows, shared by public and admin login. All POST attempts count.
 AUTH_ATTEMPT_LIMITS = {

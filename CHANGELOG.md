@@ -23,7 +23,7 @@ where applicable.
 
 - Standardize forms, help text, errors, and action links.
 - Align Bootstrap CSS and JavaScript on 5.3.8 with verified integrity hashes.
-- Retain Django 5.2.17 LTS and Python 3.11 support.
+- Upgrade Django to 6.1.1; require Python 3.12 or newer.
 - Update setup, usage, migration, security, and contribution documentation.
 
 ### Fixed

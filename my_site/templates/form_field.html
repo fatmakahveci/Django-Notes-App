@@ -1,0 +1,14 @@
+<div class="form-field{% if field.errors %} has-errors{% endif %}">
+    {% if field.name == 'categories' %}
+    <fieldset{% if field.help_text %} aria-describedby="{{ field.auto_id }}_helptext"{% endif %}><legend class="form-label">{{ field.label }} <span class="optional-label">(optional)</span></legend>
+    {{ field }}
+    {% if field.help_text %}<div class="form-text" id="{{ field.auto_id }}_helptext">{{ field.help_text|safe }}</div>{% endif %}
+    {% if field.errors %}<div class="text-danger" role="alert">{{ field.errors }}</div>{% endif %}
+    </fieldset>
+    {% else %}
+    <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}{% if not field.field.required and field.name != 'visibility' %} <span class="optional-label">(optional)</span>{% endif %}</label>
+    {{ field }}
+    {% if field.help_text %}<div class="form-text" id="{{ field.auto_id }}_helptext">{{ field.help_text|safe }}</div>{% endif %}
+    {% if field.errors %}<div class="text-danger" role="alert">{{ field.errors }}</div>{% endif %}
+    {% endif %}
+</div>

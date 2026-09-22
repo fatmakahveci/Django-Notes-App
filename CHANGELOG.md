@@ -6,6 +6,14 @@ User-facing changes and maintenance updates are recorded here.
 
 ### Added
 
+- Private drafts with owner-only reading/downloads and publication controls.
+- Draft filters, sorting options, and clickable category filters.
+- Unsaved-change warnings, keyboard saving, word counts, and form error summaries.
+- Plain-text downloads, clipboard copying, and a print-friendly note layout.
+- Browser workflow regression tests in CI and feed query-budget coverage.
+- Database readiness endpoint and a Docker Compose health check.
+- Custom 400, 403, 404, 500, and CSRF error pages with recovery guidance.
+- A shared local/CI verification script with an optional dependency audit.
 - Note detail pages, 400-character previews, and 10-note pagination.
 - Title/content search, category filtering, and a personal notes list.
 - Owner-only editing and POST-only deletion with a confirmation page.
@@ -17,6 +25,10 @@ User-facing changes and maintenance updates are recorded here.
 
 ### Changed
 
+- Consolidate application dependencies in the root requirements file and align
+  Docker, Dependabot, and audits with the development/browser dependency groups.
+- Split the desktop editor into writing and settings panels, keep save controls
+  visible, and refine mobile filters and draft navigation.
 - Clarify contributor checks, configuration examples, and repository formatting.
 - Exclude local data, environments, caches, and build outputs from Git and Docker.
 - Redesign the interface with responsive note cards, clearer filters, dedicated
@@ -30,6 +42,8 @@ User-facing changes and maintenance updates are recorded here.
 
 ### Fixed
 
+- Keep note search text aligned with persisted fields during partial saves,
+  including when `update_fields` is supplied as an iterator.
 - Normalize Unicode usernames before counting login attempts, preventing
   equivalent spellings from bypassing the shared public/admin limit.
 - Serve patched TinyMCE 7.9.3 assets in note forms and Django admin, replacing

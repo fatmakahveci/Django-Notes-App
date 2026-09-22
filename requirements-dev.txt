@@ -1,2 +1,8 @@
+# Development tools, including all application dependencies.
 -r requirements.txt
+
+# Check Python dependencies for known vulnerabilities.
 pip-audit==2.10.1
+
+# Browser tests; run `python -m playwright install chromium` after installation.
+playwright==1.63.0

@@ -23,6 +23,9 @@ possible, and coordinated disclosure is appreciated.
 
 - Published notes are public, including to visitors who are not signed in.
   Do not store passwords, credentials, or confidential information in notes.
+- Drafts are excluded from public feeds and searches. Their detail and download
+  endpoints require the owner; administrators can manage them through Django admin.
+  Draft-related pages and downloads send `Cache-Control: private, no-store`.
 - Creating a note requires authentication. The application assigns its author
   from the signed-in account. Editing and deleting require ownership, verified
   on the server for both GET and POST requests. Deletion only occurs on POST.
@@ -52,7 +55,8 @@ limits complement, rather than replace, infrastructure-level abuse protection.
 
 ## Dependency Checks
 
-CI runs `pip-audit --strict -r requirements.txt` and fails on known Python package
+CI audits application, development, and browser-test requirements with `pip-audit --strict`
+and fails on known Python package
 vulnerabilities or dependency collection errors. This does not scan JavaScript
 bundled with TinyMCE or fetched from the Bootstrap CDN. Bootstrap assets use
 version-specific integrity hashes. Review upstream editor and frontend advisories

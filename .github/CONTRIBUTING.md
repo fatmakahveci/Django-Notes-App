@@ -34,11 +34,12 @@ follow their upstream update notes when replacing them.
 Run these commands from the repository root with your virtual environment active:
 
 ```bash
-python my_site/manage.py check
-python my_site/manage.py makemigrations --check --dry-run
-python my_site/manage.py test blog_app
-python -m pip_audit --strict -r requirements.txt
+python scripts/check.py --audit
 ```
+
+The script runs system checks, migration checks, tests, and the optional dependency
+audit in order. Omit `--audit` to run without the network-dependent audit. CI uses
+the same script for the application checks.
 
 The project does not currently configure a separate linter or type checker.
 
@@ -50,8 +51,16 @@ docker build -f my_site/blog_app/Dockerfile -t django-notes:local .
 docker run --rm django-notes:local python manage.py test blog_app
 ```
 
-For interface changes, check navigation, forms, and note actions on mobile and
-desktop. For permission changes, test anonymous visitors, the note's author, and
+For interface changes, run the browser regression test:
+
+```bash
+python -m pip install -r requirements-dev.txt
+python -m playwright install chromium
+python scripts/test_browser.py
+```
+
+It starts its own server and uses an isolated test database with synthetic accounts.
+Check any additional navigation, forms, and note actions on mobile and desktop. For permission changes, test anonymous visitors, the note's author, and
 another signed-in user, including direct POST requests. Never use real account
 data in screenshots or test fixtures.
 

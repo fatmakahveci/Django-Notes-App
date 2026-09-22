@@ -1,1 +1,3 @@
--r my_site/blog_app/requirements.txt
+# Application dependencies (Python 3.12+).
+Django==6.1.1
+django-tinymce==5.0.0

@@ -1,13 +1,13 @@
-from pathlib import Path
+"""Django settings; local development defaults with environment-based deployment."""
+
 import os
+from pathlib import Path
 
 from django.core.exceptions import ImproperlyConfigured
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
+# Local defaults. Production requires DEBUG=false and a private secret key.
 
 DEBUG = os.getenv('DJANGO_DEBUG', 'true').lower() in {'1', 'true', 'yes'}
 configured_secret_key = os.getenv('DJANGO_SECRET_KEY')
@@ -58,7 +58,7 @@ ROOT_URLCONF = 'my_site.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -75,7 +75,6 @@ WSGI_APPLICATION = 'my_site.wsgi.application'
 
 
 # Database
-# https://docs.djangoproject.com/en/6.1/ref/settings/#databases
 
 DATABASES = {
     'default': {
@@ -86,7 +85,6 @@ DATABASES = {
 
 
 # Password validation
-# https://docs.djangoproject.com/en/6.1/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -105,7 +103,6 @@ AUTH_PASSWORD_VALIDATORS = [
 
 
 # Internationalization
-# https://docs.djangoproject.com/en/6.1/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
 
@@ -117,9 +114,11 @@ USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/6.1/howto/static-files/
 
 STATIC_URL = '/static/'
+STATICFILES_DIRS = [BASE_DIR / 'static']
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
 # django-tinymce 5.0.0 bundles an older editor. Serve the patched local assets
 # for both public forms and Django admin, without the unused compressor API.
 TINYMCE_JS_URL = STATIC_URL + 'vendor/tinymce-7.9.3/tinymce.min.js'
@@ -131,14 +130,10 @@ TINYMCE_DEFAULT_CONFIG = {
     'plugins': 'lists link',
     'toolbar': 'undo redo | blocks | bold italic | bullist numlist | link | removeformat',
 }
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
 # Default primary key field type
-# https://docs.djangoproject.com/en/6.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-STATIC_ROOT = BASE_DIR / "staticfiles"
 
 LOGIN_URL = "login"
 LOGIN_REDIRECT_URL = "home"

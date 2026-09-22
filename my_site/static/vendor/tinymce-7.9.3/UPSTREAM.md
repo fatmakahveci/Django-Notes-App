@@ -6,8 +6,11 @@ https://registry.npmjs.org/tinymce/-/tinymce-7.9.3.tgz
 Package integrity (SHA-512, base64):
 `sha512-Mtm54U5YJ6Pyo/GaAx+JSHXTGEuxrg2AowVWCD9zy1eBolp5Ub7S1rTtsyQdxhPegfhLuR3VLiTKGw1tacv09g==`
 
-Only the minified runtime, default icons, DOM model, silver theme, CSS skins,
-and the lists/link plugins used by this app are included. Files are unmodified.
+Only the minified runtime, default icons, DOM model, silver theme, and the
+lists/link plugins used by this app are included. CSS is limited to the default
+content style and the oxide skin (`skin.min.css` and `content.min.css`), used by
+both note forms and Django admin. Unused dark, legacy, inline, and alternate
+content skins are omitted. Retained upstream files are unmodified.
 The upstream license is in `license.md`, with third-party notices in `notices.txt`;
 the app's Apache license does not
 replace the licenses of third-party dependencies.

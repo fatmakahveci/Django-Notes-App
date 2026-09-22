@@ -1,0 +1,21 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex">
+    <title>{% block document_title %}Something went wrong{% endblock %} · Django Notes</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="icon" href="{% static 'assets/favicon.ico' %}">
+</head>
+<body class="error-page">
+    {# Avoid session-dependent navigation so this page also works during database outages. #}
+    <main class="app-main app-main-reading">
+        <p class="eyebrow">Django Notes · {% block code %}{% endblock %}</p>
+        <h1>{% block title %}Something went wrong{% endblock %}</h1>
+        <p class="page-description">{% block description %}{% endblock %}</p>
+        <a class="error-return" href="{% url 'home' %}">Return to all notes</a>
+    </main>
+</body>
+</html>

@@ -19,6 +19,7 @@ class AuthenticationThrottleMiddleware(MiddlewareMixin):
     def process_view(self, request, view_func, view_args, view_kwargs):
         if request.method != "POST":
             return None
+        # Public and admin login share a URL name and therefore the same counters.
         name = request.resolver_match.url_name
         if name not in {"login", "signup"}:
             return None
@@ -29,6 +30,7 @@ class AuthenticationThrottleMiddleware(MiddlewareMixin):
         AuthAttempt.objects.filter(expires_at__lte=now).delete()
         for identity_type, limit, seconds in rules:
             if identity_type == "ip":
+                # Forwarded headers are client-controlled unless a trusted proxy validates them.
                 identity = request.META.get("REMOTE_ADDR", "unknown")
             else:
                 user_model = get_user_model()
@@ -38,12 +40,15 @@ class AuthenticationThrottleMiddleware(MiddlewareMixin):
                 identity = UsernameField(max_length=username_field.max_length or 254).to_python(
                     request.POST.get("username", ""),
                 ).casefold()
+            # Align fixed windows across workers rather than starting one per request.
             window = int(now.timestamp()) // seconds
             expires_at = datetime.fromtimestamp((window + 1) * seconds, tz=datetime_timezone.utc)
+            # Keyed hashes keep raw usernames and IP addresses out of stored counters.
             key = salted_hmac(
                 "auth-attempt", f"{name}:{identity_type}:{identity}:{window}", algorithm="sha256",
             ).hexdigest()
             AuthAttempt.objects.get_or_create(key=key, defaults={"expires_at": expires_at})
+            # Check and increment in one SQL update to avoid concurrent lost updates.
             allowed = AuthAttempt.objects.filter(key=key, attempts__lt=limit).update(attempts=F("attempts") + 1)
             if not allowed:
                 retry_after = max(1, ceil((expires_at - now).total_seconds()))

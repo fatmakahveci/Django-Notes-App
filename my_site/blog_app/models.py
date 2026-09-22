@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User
-from django.db import models
+from django.db import models, router
 from tinymce import models as tinymce_models
 
 from .text import search_document
@@ -26,6 +26,7 @@ class Post(models.Model):
     content = tinymce_models.HTMLField()
     search_text = models.TextField(default="", blank=True, editable=False)
     categories = models.ManyToManyField(Category, blank=True)
+    is_published = models.BooleanField(default=True, db_index=True)
     publish_time = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -33,9 +34,28 @@ class Post(models.Model):
 
     def save(self, *args, **kwargs):
         update_fields = kwargs.get("update_fields")
+        if update_fields is not None:
+            # Materialize once: checking a generator would otherwise consume it.
+            update_fields = frozenset(update_fields)
+            kwargs["update_fields"] = update_fields
         if update_fields is None or {"title", "content", "search_text"}.intersection(update_fields):
-            self.search_text = search_document(self.title, self.content)
+            persisted = {}
             if update_fields is not None:
+                unchanged_fields = {"title", "content"} - update_fields
+                if unchanged_fields:
+                    # Excluded fields may have unsaved edits on this instance.
+                    # Index their database values rather than those pending edits.
+                    database = kwargs.get("using") or router.db_for_write(type(self), instance=self)
+                    persisted = (
+                        type(self).objects.using(database).filter(pk=self.pk)
+                        .values(*unchanged_fields).first()
+                    ) or {}
+            self.search_text = search_document(
+                persisted["title"] if "title" in persisted else self.title,
+                persisted["content"] if "content" in persisted else self.content,
+            )
+            if update_fields is not None:
+                # Partial saves must persist the derived search text alongside its source.
                 kwargs["update_fields"] = set(update_fields) | {"search_text"}
         super().save(*args, **kwargs)
 

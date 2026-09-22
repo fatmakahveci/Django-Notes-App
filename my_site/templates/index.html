@@ -1,24 +1,15 @@
 {% extends "base.html" %}
-
-{% block title %} Main page {% endblock %}
-
+{% block title %}Notes{% endblock %}
 {% block content %}
-
-{% if messages %}
-	<div class="messages">
-		{% for message in messages %}
-		<div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
-			{{ message }}
-		</div>
-		{% endfor %}
-	</div>
-{% endif %}
-
 {% for post in posts %}
-	<h2 style="color:#f92c85 ;">{{ post.title }}</h2>
-	<p>{{ post.content }}</p>
-	<small>Published on {{ post.published_at | date:"M d, Y" }} by {{ post.author | title}}</small>
-	<hr style="height:2px; width:100%; border-width:0; background-color:#5ebec4 ">
+<article>
+    <h2>{{ post.title }}</h2>
+    <div>{{ post.content|striptags|linebreaks }}</div>
+    <small>Published on {{ post.publish_time|date:"M d, Y" }} by {{ post.author }}</small>
+    <p>{% for category in post.categories.all %}<span class="badge bg-secondary">{{ category }}</span> {% endfor %}</p>
+</article>
+<hr>
+{% empty %}
+<p>No notes yet. <a href="{% url 'post-form' %}">Create the first note</a>.</p>
 {% endfor %}
-
 {% endblock %}

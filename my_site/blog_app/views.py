@@ -1,39 +1,49 @@
-from .models import Post
-from .forms import PostForm
 from django.contrib import messages
-from django.shortcuts import render, redirect
+from django.contrib.auth import login as auth_login
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import UserCreationForm
+from django.shortcuts import redirect, render
+from django.views.decorators.http import require_http_methods
+
+from .forms import PostForm
+from .models import Author, Post
+
 
 def home(request):
-    posts = Post.objects.all()
-    context = {"posts": posts}
-    return render(request, 'index.html', context)
+    posts = Post.objects.select_related("author").prefetch_related("categories")
+    return render(request, "index.html", {"posts": posts})
 
-def login(request):
-    context = {}
-    return render(request, "login.html", context)
 
+@require_http_methods(["GET", "POST"])
 def signup(request):
-    context = {}
-    return render(request, "signup.html", context)
+    if request.user.is_authenticated:
+        return redirect("home")
+    form = UserCreationForm(request.POST if request.method == "POST" else None)
+    if request.method == "POST" and form.is_valid():
+        user = form.save()
+        auth_login(request, user)
+        messages.success(request, "Your account has been created.")
+        return redirect("home")
+    return render(request, "signup.html", {"form": form})
 
-def logout(request):
-    context = {}
-    return render(request, "logout.html", context)
 
 def about(request):
-    context = {}
-    return render(request, "about.html", context)
+    return render(request, "about.html")
 
+
+@login_required
+@require_http_methods(["GET", "POST"])
 def create_post(request):
-    if request.method == 'GET':
-        context = {'form': PostForm()}
-        return render(request, 'post_form.html', context)
-    elif request.method == 'POST':
-        form = PostForm(request.POST)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'The post has been created successfully.')
-            return redirect('index.html')
-        else:
-            messages.error(request, 'The post cannot be created.')
-            return render(request, 'post_form.html', {'form': form})
+    form = PostForm(request.POST if request.method == "POST" else None)
+    if request.method == "POST" and form.is_valid():
+        author, _ = Author.objects.get_or_create(
+            user=request.user,
+            defaults={"user_name": request.user.get_username()[:20]},
+        )
+        post = form.save(commit=False)
+        post.author = author
+        post.save()
+        form.save_m2m()
+        messages.success(request, "The post has been created successfully.")
+        return redirect("home")
+    return render(request, "post_form.html", {"form": form})

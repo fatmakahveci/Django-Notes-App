@@ -120,6 +120,17 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.1/howto/static-files/
 
 STATIC_URL = '/static/'
+# django-tinymce 5.0.0 bundles an older editor. Serve the patched local assets
+# for both public forms and Django admin, without the unused compressor API.
+TINYMCE_JS_URL = STATIC_URL + 'vendor/tinymce-7.9.3/tinymce.min.js'
+TINYMCE_DEFAULT_CONFIG = {
+    'theme': 'silver',
+    'height': 380,
+    'menubar': False,
+    'browser_spellcheck': True,
+    'plugins': 'lists link',
+    'toolbar': 'undo redo | blocks | bold italic | bullist numlist | link | removeformat',
+}
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
 # Default primary key field type

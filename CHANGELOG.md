@@ -17,9 +17,19 @@ where applicable.
 - Regression tests for permissions, text rendering, filters, pagination,
   authentication limits, and author-name migrations.
 - Docker build/runtime checks and Python dependency auditing in CI.
-- Application demo GIF and an expanded root security policy.
+- Expanded root security policy.
+
+### Removed
+
+- Personal footer credit, identifying profile links, and the old demo GIF
+  containing the credit.
 
 ### Changed
+
+- Redesign the interface with responsive note cards, clearer filters, dedicated
+  reading and form layouts, and a footer that stays below short pages.
+- Replace category multi-selects with accessible checkboxes and simplify the
+  editor toolbar; add active navigation states and keyboard focus styling.
 
 - Standardize forms, help text, errors, and action links.
 - Align Bootstrap CSS and JavaScript on 5.3.8 with verified integrity hashes.
@@ -28,6 +38,10 @@ where applicable.
 
 ### Fixed
 
+- Normalize Unicode usernames before counting login attempts, preventing
+  equivalent spellings from bypassing the shared public/admin limit.
+- Serve patched TinyMCE 7.9.3 assets in note forms and Django admin, replacing
+  the vulnerable 7.8.0 bundled with django-tinymce. Remove unused editor endpoints.
 - Search visible text across HTML formatting, character entities, and Unicode
   case differences; backfill existing notes and refresh search text on save.
 

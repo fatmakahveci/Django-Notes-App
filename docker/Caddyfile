@@ -1,0 +1,33 @@
+{
+    servers {
+        timeouts {
+            read_header 10s
+            read_body 60s
+            idle 120s
+        }
+    }
+}
+
+{$DOMAIN} {
+    encode zstd gzip
+    request_body {
+        max_size 26MiB
+    }
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Content-Type-Options nosniff
+        Referrer-Policy same-origin
+        -Server
+    }
+    handle_path /static/* {
+        root * /srv/static
+        file_server
+    }
+    handle {
+        reverse_proxy web:8000 {
+            # Overwrite client-supplied values before Django trusts them.
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-Proto {scheme}
+        }
+    }
+}

@@ -5,8 +5,8 @@ from pathlib import Path
 import sys
 
 ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(ROOT / "my_site"))
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "my_site.settings")
+sys.path.insert(0, str(ROOT / "src"))
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 
 import django
 
@@ -18,7 +18,7 @@ from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from django.test.runner import DiscoverRunner
 from playwright.sync_api import expect, sync_playwright
 
-from blog_app.models import Category, Post
+from notes.models import Category, Post
 
 
 class WritingBrowserTests(StaticLiveServerTestCase):
@@ -131,6 +131,148 @@ class WritingBrowserTests(StaticLiveServerTestCase):
         self.assertTrue(note.is_published)
         self.assertEqual(note.categories.get().title, "Ideas")
         self.assertEqual(Post.objects.count(), 1)
+
+    def test_recovery_collection_tools_and_accessibility(self):
+        User.objects.create_user("notebook_browser", password="Browser-test-only-832!")
+        with sync_playwright() as playwright:
+            options = {"headless": True}
+            if os.getenv("PLAYWRIGHT_CHANNEL"):
+                options["channel"] = os.environ["PLAYWRIGHT_CHANNEL"]
+            browser = playwright.chromium.launch(**options)
+            page = browser.new_page(viewport={"width": 1280, "height": 1000})
+            errors = []
+            page.on("pageerror", lambda error: errors.append(str(error)))
+            page.goto(self.live_server_url + "/")
+            page.keyboard.press("Tab")
+            expect(page.get_by_role("link", name="Skip to content")).to_be_focused()
+            page.keyboard.press("Enter")
+            expect(page.locator("#main-content")).to_be_focused()
+            page.goto(self.live_server_url + "/login.html")
+            page.get_by_label("Username", exact=True).fill("notebook_browser")
+            page.get_by_label("Password", exact=True).fill("Browser-test-only-832!")
+            page.get_by_role("button", name="Log in", exact=True).click()
+            page.goto(self.live_server_url + "/post_form.html")
+            page.wait_for_function("window.tinymce?.activeEditor?.initialized")
+            page.get_by_label("Title", exact=True).fill("Recovered writing")
+            page.get_by_label("Personal tags", exact=False).fill("project, ideas")
+            page.frame_locator("iframe").locator("body").fill("Words worth keeping")
+            expect(page.locator("[data-save-status]")).to_have_text("Private recovery copy saved", timeout=10000)
+            page.once("dialog", lambda dialog: dialog.accept())
+            page.reload()
+            page.wait_for_function("window.tinymce?.activeEditor?.initialized")
+            expect(page.get_by_label("Title", exact=True)).to_have_value("Recovered writing")
+            expect(page.get_by_label("Visibility", exact=True)).to_have_value("draft")
+            expect(page.get_by_label("Personal tags", exact=False)).to_have_value("project, ideas")
+            page.get_by_role("button", name="Save", exact=True).click()
+            page.wait_for_url(self.live_server_url + "/notes/mine/")
+            page.get_by_role("button", name="Pin: Recovered writing", exact=True).click()
+            expect(page.get_by_role("button", name="Unpin: Recovered writing", exact=True)).to_have_attribute("aria-pressed", "true")
+            page.locator("summary").filter(has_text="Bulk actions").click()
+            page.get_by_role("checkbox", name="Select all notes on this page").focus()
+            page.keyboard.press("Space")
+            expect(page.locator("[data-selection-count]")).to_have_text("1 note selected")
+            page.get_by_label("Action", exact=True).select_option("publish")
+            page.get_by_role("button", name="Apply to selected notes").click()
+            expect(page.get_by_role("heading", name="Publish selected notes?")).to_be_visible()
+            page.get_by_role("button", name="Publish notes", exact=True).click()
+            page.get_by_role("link", name="Recovered writing", exact=True).click()
+            page.get_by_role("link", name="Edit note", exact=True).click()
+            page.wait_for_function("window.tinymce?.activeEditor?.initialized")
+            page.frame_locator("iframe").locator("body").fill("A later version")
+            page.get_by_role("button", name="Save changes", exact=True).click()
+            page.get_by_role("link", name="Version history", exact=True).click()
+            page.get_by_role("button", name="Restore as draft", exact=False).first.click()
+            expect(page.locator(".draft-notice")).to_be_visible()
+            expect(page.locator("[data-note-body]")).to_contain_text("Words worth keeping")
+            page.get_by_role("link", name="Delete note", exact=True).click()
+            page.get_by_role("button", name="Move to Trash", exact=True).click()
+            page.get_by_role("link", name="Trash", exact=True).click()
+            page.get_by_role("button", name="Restore as draft", exact=False).click()
+            page.goto(self.live_server_url + "/notes/mine/")
+            page.locator("summary").filter(has_text="More filters").click()
+            page.get_by_label("Personal tag", exact=True).select_option(label="project")
+            page.get_by_role("button", name="Apply", exact=True).click()
+            expect(page.locator("article")).to_have_count(1)
+            for width in (320, 768, 1280):
+                page.set_viewport_size({"width": width, "height": 1000})
+                self.assertLessEqual(page.evaluate("document.documentElement.scrollWidth"), width)
+                if os.getenv("BROWSER_SCREENSHOT_DIR"):
+                    destination = Path(os.environ["BROWSER_SCREENSHOT_DIR"])
+                    destination.mkdir(parents=True, exist_ok=True)
+                    page.screenshot(path=str(destination / f"collection-{width}.png"), full_page=True)
+            page.get_by_role("link", name="Import / export", exact=True).click()
+            with page.expect_download() as result:
+                page.get_by_role("link", name="Download backup", exact=True).click()
+            archive = Path(result.value.path()).read_bytes()
+            page.get_by_label("Markdown or ZIP file").set_input_files({"name": "backup.zip", "mimeType": "application/zip", "buffer": archive})
+            page.get_by_role("button", name="Import as drafts", exact=True).click()
+            page.wait_for_url(self.live_server_url + "/notes/mine/")
+            expect(page.locator("article")).to_have_count(2)
+            expect(page.locator(".draft-badge")).to_have_count(2)
+            # Every visible native field has an accessible name from an explicit label.
+            missing = page.locator("input:not([type=hidden]), select, textarea").evaluate_all("elements => elements.filter(el => el.getClientRects().length && !(el.labels?.length || el.getAttribute('aria-label') || el.getAttribute('aria-labelledby'))).map(el => el.name)")
+            self.assertEqual(missing, [])
+            self.assertFalse(errors, errors)
+            browser.close()
+
+    def test_failed_autosave_keeps_manual_save_available(self):
+        User.objects.create_user("offline_writer", password="Browser-test-only-832!")
+        with sync_playwright() as playwright:
+            options = {"headless": True}
+            if os.getenv("PLAYWRIGHT_CHANNEL"):
+                options["channel"] = os.environ["PLAYWRIGHT_CHANNEL"]
+            browser = playwright.chromium.launch(**options)
+            page = browser.new_page()
+            page.goto(self.live_server_url + "/login.html")
+            page.get_by_label("Username", exact=True).fill("offline_writer")
+            page.get_by_label("Password", exact=True).fill("Browser-test-only-832!")
+            page.get_by_role("button", name="Log in", exact=True).click()
+            page.goto(self.live_server_url + "/post_form.html")
+            page.wait_for_function("window.tinymce?.activeEditor?.initialized")
+            page.route("**/notes/autosave/", lambda route: route.fulfill(status=503, content_type="application/json", body='{"error":"Unavailable"}'))
+            page.get_by_label("Title", exact=True).fill("Manual save still works")
+            page.get_by_label("Visibility", exact=True).select_option("draft")
+            page.frame_locator("iframe").locator("body").fill("Keep this writing")
+            expect(page.locator("[data-save-status]")).to_have_text("Backup failed. Save your note before leaving.", timeout=10000)
+            page.get_by_role("button", name="Save", exact=True).click()
+            page.wait_for_url(self.live_server_url + "/notes/mine/")
+            expect(page.get_by_role("link", name="Manual save still works", exact=True)).to_be_visible()
+            browser.close()
+
+    def test_two_tabs_cannot_overwrite_new_note_recovery(self):
+        User.objects.create_user("two_tab_writer", password="Browser-test-only-832!")
+        with sync_playwright() as playwright:
+            options = {"headless": True}
+            if os.getenv("PLAYWRIGHT_CHANNEL"):
+                options["channel"] = os.environ["PLAYWRIGHT_CHANNEL"]
+            browser = playwright.chromium.launch(**options)
+            context = browser.new_context()
+            first = context.new_page()
+            first.goto(self.live_server_url + "/login.html")
+            first.get_by_label("Username", exact=True).fill("two_tab_writer")
+            first.get_by_label("Password", exact=True).fill("Browser-test-only-832!")
+            first.get_by_role("button", name="Log in", exact=True).click()
+            first.wait_for_url(self.live_server_url + "/")
+            second = context.new_page()
+            for page in (first, second):
+                page.goto(self.live_server_url + "/post_form.html")
+                page.wait_for_function("window.tinymce?.activeEditor?.initialized")
+            first.get_by_label("Title", exact=True).fill("Winning recovery")
+            first.frame_locator("iframe").locator("body").fill("Keep the first tab's text")
+            expect(first.locator("[data-save-status]")).to_have_text("Private recovery copy saved", timeout=10000)
+            second.get_by_label("Title", exact=True).fill("Losing tab")
+            second.frame_locator("iframe").locator("body").fill("Keep this text in the second tab")
+            expect(second.locator("[data-save-status]")).to_contain_text("Another tab saved a newer recovery copy", timeout=10000)
+            second.get_by_role("button", name="Save", exact=True).click()
+            expect(second.locator("[data-error-summary]")).to_contain_text("Another tab changed the recovery copy")
+            expect(second.get_by_label("Title", exact=True)).to_have_value("Losing tab")
+            expect(second.locator("[data-error-summary]")).to_be_focused()
+            recovered = context.new_page()
+            recovered.goto(self.live_server_url + "/post_form.html")
+            expect(recovered.get_by_label("Title", exact=True)).to_have_value("Winning recovery")
+            expect(recovered.get_by_label("Visibility", exact=True)).to_have_value("draft")
+            browser.close()
+        self.assertFalse(Post.objects.exists())
 
     def test_draft_form_and_download_work_without_javascript(self):
         User.objects.create_user("no_js_writer", password="Browser-test-only-832!")

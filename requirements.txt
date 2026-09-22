@@ -1,3 +1,8 @@
 # Application dependencies (Python 3.12+).
 Django==6.1.1
 django-tinymce==5.0.0
+nh3==0.3.7
+markdown-it-py==4.2.0
+markdownify==1.2.3
+# Production WSGI server (used by the production Docker configuration).
+gunicorn==26.2.0

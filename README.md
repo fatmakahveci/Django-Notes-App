@@ -5,21 +5,24 @@
 [![Django](https://img.shields.io/badge/Django-5.2-092E20?logo=django&logoColor=white)](https://www.djangoproject.com/)
 [![License](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE.md)
 
-A server-rendered Django application for organizing authored posts with categories, authentication screens, and rich-text editing.
+A Django application for writing and sharing notes, with user accounts, optional categories, and a rich-text editor.
 
-## Highlights
+## Demo
 
-- Post, author, and category domain models
-- Account signup, login, and logout routes
-- Rich-text editing with Django TinyMCE
-- Environment-driven production security settings
+![Django Notes demo showing registration, note creation, category selection, and login/logout](demo.gif)
 
-## Technology
+A 22-second walkthrough of creating an account, publishing a categorized note,
+and signing out and back in.
 
-- Python
-- Django
-- TinyMCE
-- SQLite
+## Features
+
+- Register, log in, and log out with Django authentication
+- Write notes with TinyMCE; authors are assigned from the signed-in account
+- Organize notes with optional categories managed through Django admin
+- Browse a public feed with authors, publication dates, and categories
+- Run locally with SQLite or Docker Compose
+
+Built with **Python**, **Django 5.2**, **TinyMCE**, and **SQLite**.
 
 ## Getting Started
 
@@ -30,26 +33,35 @@ A server-rendered Django application for organizing authored posts with categori
 
 ### Installation
 
+Clone the repository and run all commands from its root directory:
+
 ```bash
+git clone https://github.com/fatmakahveci/Django-Notes-App.git
+cd Django-Notes-App
 python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install -r requirements.txt
-cd my_site
-python manage.py migrate
-python manage.py runserver
+python my_site/manage.py migrate
+python my_site/manage.py runserver
 ```
 
 Open http://127.0.0.1:8000.
 
 ## Using the App
 
-Register an account, log in, and select **Create a new post**. Posts are public,
-and their author is assigned from the signed-in account. Categories are optional;
-create them in the admin using a superuser:
+1. Select **Register** to create an account. Registration signs you in automatically.
+2. Select **Create a new post**, enter a title and content, and optionally choose categories.
+3. Select **Save** to publish the note in the public feed.
+4. Use **Log out** to end your session and **Log in** to return.
+
+All published notes are visible to everyone, including visitors who are not
+signed in. To manage categories, create an administrator account:
 
 ```bash
 python my_site/manage.py createsuperuser
 ```
+
+Then sign in at http://127.0.0.1:8000/admin/ and add categories.
 
 The editor stores rich text; the public feed displays a plain-text preview to
 avoid rendering untrusted HTML.
@@ -62,8 +74,16 @@ From the repository root:
 docker compose up --build
 ```
 
-Open http://127.0.0.1:8000. Migrations run automatically and SQLite data persists
+Docker with the Compose plugin is required. Open http://127.0.0.1:8000. Migrations run automatically and SQLite data persists
 in the `notes-data` volume. This uses Django's development server.
+
+To create an administrator while the service is running:
+
+```bash
+docker compose exec web python manage.py createsuperuser
+```
+
+Stop the service with `docker compose down`; the database volume is retained.
 
 ## Configuration
 
@@ -83,8 +103,7 @@ enabled when debug is disabled.
 
 ## Quality Checks
 
-Run from the repository root:
-
+Run from the repository root with the virtual environment activated:
 
 ```bash
 python my_site/manage.py check
@@ -92,11 +111,22 @@ python my_site/manage.py makemigrations --check --dry-run
 python my_site/manage.py test blog_app
 ```
 
+CI runs these checks on pushes and pull requests to `main`.
+
 ## Repository Structure
 
-- `my_site/blog_app` — models, views, URLs, and dependencies
-- `my_site/templates` — server-rendered pages
-- `my_site/my_site` — project settings and root routing
+```text
+Django-Notes-App/
+├── demo.gif                 # Application walkthrough
+├── docker-compose.yml      # Local Docker setup
+├── requirements.txt        # Dependency entry point
+└── my_site/
+    ├── manage.py           # Django management commands
+    ├── blog_app/           # Models, forms, views, tests, and migrations
+    ├── my_site/            # Settings and root URL configuration
+    ├── static/             # Styles and static assets
+    └── templates/          # Server-rendered pages
+```
 
 ## Project Resources
 

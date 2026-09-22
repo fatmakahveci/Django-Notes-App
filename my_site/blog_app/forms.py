@@ -29,9 +29,19 @@ class SignupForm(StyledFormMixin, UserCreationForm):
 
 
 class PostForm(StyledFormMixin, ModelForm):
+    visibility = forms.ChoiceField(
+        choices=[("published", "Published — public"), ("draft", "Draft — private")],
+        required=False,
+        help_text="Drafts are visible only to you and administrators. You can publish them later.",
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["visibility"].initial = "published" if self.instance.is_published else "draft"
+
     class Meta:
         model = Post
-        fields = ["title", "content", "categories"]
+        fields = ["title", "content", "categories", "visibility"]
         widgets = {
             "title": forms.TextInput(attrs={"placeholder": "Give your note a title"}),
             "content": TinyMCE(mce_attrs={
@@ -44,8 +54,17 @@ class PostForm(StyledFormMixin, ModelForm):
         }
         help_texts = {"categories": "Choose any that fit your note, or leave them unchecked."}
 
+    def clean_visibility(self):
+        return self.cleaned_data["visibility"] or ("published" if self.instance.is_published else "draft")
+
+    def save(self, commit=True):
+        self.instance.is_published = self.cleaned_data["visibility"] == "published"
+        return super().save(commit=commit)
+
     def clean_content(self):
         content = self.cleaned_data["content"]
+        # Ignore invisible characters only for the emptiness check. Keep the
+        # original text intact, including joiners used in emoji and other scripts.
         visible = plain_text(content).translate(dict.fromkeys(map(ord, "\u200b\u200c\u200d\ufeff")))
         if not visible.strip():
             raise ValidationError("Write some text before saving your note.")

@@ -2,9 +2,16 @@
 {% load note_text %}
 {% block document_title %}{% if mine %}My notes{% else %}All notes{% endif %} · Django Notes{% endblock %}
 {% block title %}{% if mine %}My notes{% else %}Notes worth keeping.{% endif %}{% endblock %}
-{% block description %}<p class="page-description">{% if mine %}Your ideas, collected in one place. All your published notes are public.{% else %}A place for useful ideas, small discoveries, and things to remember.{% endif %}</p>{% endblock %}
-{% block page_actions %}<div class="collection-count"><strong>{{ page_obj.paginator.count }}</strong><span>{% if query or selected_category %}matching note{% else %}published note{% endif %}{{ page_obj.paginator.count|pluralize }}</span></div>{% endblock %}
+{% block description %}<p class="page-description">{% if mine %}Your drafts and published notes, in one place. Drafts are visible only to you and administrators.{% else %}A place for useful ideas, small discoveries, and things to remember.{% endif %}</p>{% endblock %}
+{% block page_actions %}<div class="collection-count"><strong>{{ page_obj.paginator.count }}</strong><span>{% if query or selected_category %}matching note{% elif mine %}note{% else %}published note{% endif %}{{ page_obj.paginator.count|pluralize }}</span></div>{% endblock %}
 {% block content %}
+{% if mine %}
+<nav class="collection-tabs" aria-label="Note visibility">
+    <a href="{% querystring state=None page=None %}"{% if state == 'all' %} aria-current="page"{% endif %}>All my notes</a>
+    <a href="{% querystring state='draft' page=None %}"{% if state == 'draft' %} aria-current="page"{% endif %}>Drafts</a>
+    <a href="{% querystring state='published' page=None %}"{% if state == 'published' %} aria-current="page"{% endif %}>Published</a>
+</nav>
+{% endif %}
 <form method="get" class="note-filters" role="search">
     <div class="search-field">
         <label for="note-query" class="form-label">Search notes</label>
@@ -17,15 +24,25 @@
             {% for category in categories %}<option value="{{ category.pk }}"{% if selected_category == category.pk|stringformat:"s" %} selected{% endif %}>{{ category }}</option>{% endfor %}
         </select>
     </div>
+    <div class="filter-sort">
+        <label for="note-sort" class="form-label">Sort by</label>
+        <select name="sort" id="note-sort" class="form-select">
+            {% for value, label in sort_options %}<option value="{{ value }}"{% if sort == value %} selected{% endif %}>{{ label }}</option>{% endfor %}
+        </select>
+    </div>
+    {% if mine %}<input type="hidden" name="state" value="{{ state }}">{% endif %}
     <button type="submit" class="btn btn-primary">Apply</button>
-    {% if query or selected_category %}<a class="clear-filters" href="{% if mine %}{% url 'my-notes' %}{% else %}{% url 'home' %}{% endif %}">Clear filters</a>{% endif %}
+    {% if query or selected_category or state != 'all' or sort != 'newest' %}<a class="clear-filters" href="{% if mine %}{% url 'my-notes' %}{% else %}{% url 'home' %}{% endif %}">Clear filters</a>{% endif %}
 </form>
-<div class="list-heading"><h2>{% if query or selected_category %}Search results{% elif mine %}Your collection{% else %}From the notebook{% endif %}</h2><span>Newest first</span></div>
+<div class="list-heading"><h2>{% if query or selected_category %}Search results{% elif mine %}Your collection{% else %}From the notebook{% endif %}</h2><span>{% if page_obj.paginator.count %}{{ page_obj.start_index }}–{{ page_obj.end_index }} of {{ page_obj.paginator.count }} · {% endif %}{{ sort_label }}</span></div>
 <div class="notes-grid">
 {% for post in posts %}
 <article>
-    <div class="note-card">
-        <div class="note-categories">{% for category in post.categories.all %}<span class="category-chip">{{ category }}</span>{% empty %}<span class="category-chip category-chip-muted">Uncategorized</span>{% endfor %}</div>
+    <div class="note-card{% if not post.is_published %} note-card-draft{% endif %}">
+        <div class="note-categories">
+            {% if not post.is_published %}<span class="category-chip draft-badge">Draft</span>{% endif %}
+            {% for category in post.categories.all %}<a class="category-chip" href="{% querystring category=category.pk page=None %}" aria-label="Filter by {{ category }}">{{ category }}</a>{% empty %}<span class="category-chip category-chip-muted">Uncategorized</span>{% endfor %}
+        </div>
         <h3 class="note-card-title"><a href="{% url 'post-detail' post.pk %}">{{ post.title }}</a></h3>
         <div class="note-excerpt">{{ post.content|note_text|truncatechars:400|linebreaks }}</div>
         <div class="note-card-bottom">
@@ -37,7 +54,7 @@
 {% empty %}
 <div class="empty-state">
     <span class="empty-mark" aria-hidden="true">✎</span>
-    {% if query or selected_category %}<h3>No notes match your filters.</h3><p>Try another phrase or choose a different category.</p><a class="btn btn-outline-primary" href="{% if mine %}{% url 'my-notes' %}{% else %}{% url 'home' %}{% endif %}">Reset filters</a>
+    {% if query or selected_category or state != 'all' %}<h3>No notes match your filters.</h3><p>Try another phrase or choose a different filter.</p><a class="btn btn-outline-primary" href="{% if mine %}{% url 'my-notes' %}{% else %}{% url 'home' %}{% endif %}">Reset filters</a>
     {% else %}<h3>No notes yet.</h3><p>Every collection starts with one idea.</p><a class="btn btn-primary" href="{% url 'post-form' %}">Create the first note</a>{% endif %}
 </div>
 {% endfor %}

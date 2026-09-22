@@ -16,6 +16,7 @@ class _TextExtractor(HTMLParser):
     def __init__(self):
         super().__init__(convert_charrefs=True)
         self.parts = []
+        # Track nested hidden elements so their text never enters previews or search.
         self.hidden = []
 
     def handle_starttag(self, tag, attrs):
@@ -48,12 +49,14 @@ def plain_text(html):
     parser.feed(html)
     parser.close()
     text = "".join(parser.parts).replace("\xa0", " ")
+    # Collapse spacing without losing the paragraph boundaries added by the parser.
     text = re.sub(r"[^\S\n]+", " ", text)
     text = re.sub(r" *\n *", "\n", text)
     return re.sub(r"\n{3,}", "\n\n", text).strip()
 
 
 def normalize_search(text):
+    # Apply the same Unicode, case, and whitespace rules to saved text and queries.
     return " ".join(unicodedata.normalize("NFKC", text).casefold().split())
 
 

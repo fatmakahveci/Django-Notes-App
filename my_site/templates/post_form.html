@@ -1,14 +1,41 @@
 {% extends "base.html" %}
+{% load static %}
 {% block document_title %}{% if post %}Edit note{% else %}New note{% endif %} · Django Notes{% endblock %}
 {% block layout_class %}app-main-editor{% endblock %}
 {% block eyebrow %}Your notebook{% endblock %}
 {% block title %}{% if post %}Edit note{% else %}Create a new post{% endif %}{% endblock %}
-{% block description %}<p class="page-description">Make room for an idea. Published notes are visible to everyone.</p>{% endblock %}
+{% block description %}<p class="page-description">Save a private draft while you write, or publish when you're ready.</p>{% endblock %}
 {% block content %}
 {{ form.media }}
-<form method="post" class="surface editor-surface">
+<form method="post" class="surface editor-surface" data-note-editor data-unsaved="{{ form.errors|yesno:'true,false' }}">
     {% csrf_token %}
-    {% include "form_fields.html" %}
-    <div class="form-actions"><p>Your note will be public.</p><div class="note-actions"><a class="btn btn-light" href="{% if post %}{% url 'post-detail' post.pk %}{% else %}{% url 'home' %}{% endif %}">Cancel</a><button type="submit" class="btn btn-primary">{% if post %}Save changes{% else %}Save{% endif %}</button></div></div>
+    {% include "form_errors.html" %}
+    <div class="editor-layout">
+        <section class="editor-writing" aria-label="Write your note">
+            {% include "form_field.html" with field=form.title %}
+            {% include "form_field.html" with field=form.content %}
+        </section>
+        <aside class="editor-settings" aria-labelledby="note-settings-title">
+            <div class="settings-heading">
+                <span class="settings-mark" aria-hidden="true">✎</span>
+                <h2 id="note-settings-title">Note settings</h2>
+                <p>A little structure for your ideas.</p>
+            </div>
+            {% include "form_field.html" with field=form.visibility %}
+            {% include "form_field.html" with field=form.categories %}
+            <div class="writing-hint"><strong>Your words, kept simple.</strong><p>Reading pages keep your paragraphs and line breaks. Text styling and images aren't displayed.</p></div>
+        </aside>
+    </div>
+    <div class="form-actions">
+        <div class="save-info">
+            <div class="editor-feedback" hidden data-editor-feedback>
+                <span data-word-count></span>
+                <span data-save-status role="status" aria-live="polite">No unsaved changes</span>
+            </div>
+            <p>Your visibility setting applies when you save.<span class="save-shortcut" hidden data-save-shortcut>Ctrl / ⌘ + Enter to save.</span></p>
+        </div>
+        <div class="note-actions"><a class="btn btn-light" href="{% if post %}{% url 'post-detail' post.pk %}{% else %}{% url 'home' %}{% endif %}">Cancel</a><button type="submit" class="btn btn-primary">{% if post %}Save changes{% else %}Save{% endif %}</button></div>
+    </div>
 </form>
 {% endblock %}
+{% block scripts %}<script src="{% static 'js/note-editor.js' %}" defer></script>{% endblock %}

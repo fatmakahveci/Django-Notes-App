@@ -1,18 +1,27 @@
 {% extends "base.html" %}
-{% load note_text %}
+{% load static %}
 {% block document_title %}{{ post.title }} · Django Notes{% endblock %}
 {% block layout_class %}app-main-reading{% endblock %}
 {% block eyebrow %}<a href="{% url 'home' %}" class="back-link">← All notes</a>{% endblock %}
 {% block title %}{{ post.title }}{% endblock %}
-{% block description %}<p class="page-description">Published on {{ post.publish_time|date:"M d, Y" }} by {{ post.author }}</p>{% endblock %}
+{% block description %}<p class="page-description">Created on {{ post.publish_time|date:"M d, Y" }} by {{ post.author }}</p>{% endblock %}
 {% block content %}
 <article>
     <div class="surface reading-surface">
-        {% if post.categories.all %}<div class="note-categories">{% for category in post.categories.all %}<span class="category-chip">{{ category }}</span>{% endfor %}</div>{% endif %}
-        <div class="note-body">{{ post.content|note_text|linebreaks }}</div>
+        {% if not post.is_published %}<p class="draft-notice">This draft is visible only to you and administrators. Edit its visibility to publish it.</p>{% endif %}
+        {% if post.categories.all %}<div class="note-categories">{% for category in post.categories.all %}<a class="category-chip" href="{% url 'home' %}?category={{ category.pk }}">{{ category }}</a>{% endfor %}</div>{% endif %}
+        <div class="note-body" data-note-body>{{ note_text|linebreaks }}</div>
+        <div class="note-tools" aria-label="Note tools">
+            <a class="btn btn-outline-primary" href="{% url 'post-download' post.pk %}">Download .txt</a>
+            <button class="btn btn-outline-primary" type="button" data-copy-note hidden>Copy text</button>
+            <button class="btn btn-outline-primary" type="button" data-print-note hidden>Print</button>
+            <span role="status" aria-live="polite" data-copy-status></span>
+        </div>
+        {{ note_text|json_script:"note-plain-text" }}
         {% if user.is_authenticated and post.author.user_id == user.pk %}
         <div class="note-actions reading-actions"><a href="{% url 'post-edit' post.pk %}" class="btn btn-primary">Edit note</a><a href="{% url 'post-delete' post.pk %}" class="btn btn-outline-danger">Delete note</a></div>
         {% endif %}
     </div>
 </article>
 {% endblock %}
+{% block scripts %}<script src="{% static 'js/note-tools.js' %}" defer></script>{% endblock %}

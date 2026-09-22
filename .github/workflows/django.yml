@@ -25,11 +25,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
       - name: Run tests
-        working-directory: my_site
-        run: |
-          python manage.py check
-          python manage.py makemigrations --check --dry-run
-          python manage.py test
+        run: python scripts/check.py
 
   docker:
     timeout-minutes: 15
@@ -56,4 +52,20 @@ jobs:
       - name: Install audit tooling
         run: python -m pip install -r requirements-dev.txt
       - name: Audit Python dependencies
-        run: python -m pip_audit --strict -r requirements.txt
+        run: python -m pip_audit --strict -r requirements-dev.txt -r requirements-browser.txt
+
+  browser:
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install browser test dependencies
+        run: |
+          python -m pip install -r requirements-browser.txt
+          python -m playwright install --with-deps chromium
+      - name: Check the writing workflow in a browser
+        run: python scripts/test_browser.py

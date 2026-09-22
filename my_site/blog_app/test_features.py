@@ -165,6 +165,32 @@ class NoteFeatureTests(TestCase):
             self.assertEqual(response.status_code, 200)
             self.assertEqual(list(response.context["posts"]), [])
 
+    def test_partial_save_indexes_only_persisted_values(self):
+        self.post.title = "Unsaved replacement title"
+        self.post.content = "<p>New content</p>"
+        self.post.save(update_fields=["content"])
+        self.post.refresh_from_db()
+        self.assertEqual(self.post.title, "Django journal")
+        self.assertEqual(self.post.search_text, "django journal new content")
+        self.assertEqual(list(self.client.get(reverse("home"), {"q": "Django journal"}).context["posts"]), [self.post])
+        self.assertEqual(list(self.client.get(reverse("home"), {"q": "Unsaved replacement"}).context["posts"]), [])
+
+        self.post.title = "Saved title"
+        self.post.content = "Unsaved content"
+        self.post.save(update_fields=["title"])
+        self.post.refresh_from_db()
+        self.assertEqual(self.post.content, "<p>New content</p>")
+        self.assertEqual(self.post.search_text, "saved title new content")
+
+    def test_partial_save_accepts_an_iterator_of_fields(self):
+        self.post.title = "Iterator title"
+        self.post.content = "<p>Iterator content</p>"
+        self.post.save(update_fields=iter(["title", "content"]))
+        self.post.refresh_from_db()
+        self.assertEqual(self.post.title, "Iterator title")
+        self.assertEqual(self.post.content, "<p>Iterator content</p>")
+        self.assertEqual(self.post.search_text, "iterator title iterator content")
+
     def test_my_notes_remains_scoped_when_filters_are_supplied(self):
         self.client.force_login(self.owner)
         response = self.client.get(reverse("my-notes"))

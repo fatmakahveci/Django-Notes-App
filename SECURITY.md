@@ -10,11 +10,10 @@ Older releases and unmaintained branches may not receive security fixes.
 Please do not disclose security vulnerabilities in public issues, discussions,
 or pull requests.
 
-Report a vulnerability through this repository's
-[private vulnerability reporting](https://github.com/fatmakahveci/Django-Notes-App/security/advisories/new).
-If that option is unavailable, contact the repository owner through the
-[GitHub profile](https://github.com/fatmakahveci) to arrange a private reporting
-channel.
+On this repository's GitHub page, open **Security → Advisories → Report a
+vulnerability** to send a private report. If that option is unavailable, ask
+a maintainer to enable private reporting without including vulnerability details
+in the request.
 
 Include the affected component and version, reproduction steps, potential
 impact, and any suggested mitigation. Reports will be reviewed as promptly as
@@ -38,6 +37,8 @@ username per 10-minute fixed window. Signup is limited to 5 attempts per IP per
 hour. All attempts count, including successful submissions. Exceeding a limit
 returns HTTP 429 and a `Retry-After` header without processing authentication.
 CSRF-rejected requests and GET requests do not consume attempts.
+Username counters use the same Unicode normalization as Django login forms,
+so equivalent spellings share a limit.
 
 Counters are stored in the database and incremented atomically across workers.
 Identifiers are keyed hashes, not plaintext usernames or IP addresses. Expired
@@ -56,6 +57,11 @@ vulnerabilities or dependency collection errors. This does not scan JavaScript
 bundled with TinyMCE or fetched from the Bootstrap CDN. Bootstrap assets use
 version-specific integrity hashes. Review upstream editor and frontend advisories
 alongside Python dependency updates.
+
+Both note forms and Django admin load the patched local TinyMCE 7.9.3 runtime,
+not the older runtime bundled with django-tinymce. See the vendored
+[source and update notes](my_site/static/vendor/tinymce-7.9.3/UPSTREAM.md).
+Unused compressor, file-browser, and flatpage-list endpoints are not exposed.
 
 ## Deployment
 

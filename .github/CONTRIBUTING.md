@@ -1,60 +1,66 @@
 # Contributing
 
-Thank you for taking the time to improve this project. Focused bug fixes,
-documentation improvements, tests, and well-scoped features are welcome.
+Bug fixes, documentation improvements, and focused features are welcome.
+Check existing issues and pull requests before starting. For a larger change,
+open an issue describing the problem and proposed approach first.
 
-## Before You Start
+Report vulnerabilities privately using the [security policy](../SECURITY.md).
 
-- Search existing issues and pull requests to avoid duplicate work.
-- Open an issue before starting a large or breaking change so the approach can
-  be discussed first.
-- Report security vulnerabilities privately by following the
-  [security policy](../SECURITY.md).
+## Set up your workspace
 
-## Development Workflow
-
-1. Fork or clone the repository and create a branch from the default branch.
-2. Follow the setup and development instructions in the repository README.
-3. Keep changes focused and consistent with the existing code style.
-4. Add or update tests and documentation when behavior changes.
-5. Run the available lint, type-check, test, and build commands before opening
-   a pull request.
-
-Use a short, descriptive branch name such as `fix/note-preview` or
-`feat/note-search`. Write clear commit messages in the imperative mood and
-avoid mixing unrelated changes in one commit.
-
-## Local Checks
-
-From the repository root, with your virtual environment activated:
+Follow the [README](../README.md#run-it-locally) to install Python dependencies
+and initialize the database, then install the development tools:
 
 ```bash
 python -m pip install -r requirements-dev.txt
+```
+
+Create a branch from the latest `main`. Keep local databases, credentials, and
+virtual environments out of commits. `.env.example` lists the supported settings;
+the application reads environment variables and does not load `.env` files itself.
+
+## Make a change
+
+Keep each pull request focused on one problem. Follow the surrounding code style
+and the whitespace settings in `.editorconfig`. Update tests when behavior changes,
+and update the README when setup or usage changes.
+
+Database changes need a migration. Do not edit migrations that have already been
+released. Third-party files under `my_site/static/vendor/` should remain unmodified;
+follow their upstream update notes when replacing them.
+
+## Check your work
+
+Run these commands from the repository root with your virtual environment active:
+
+```bash
 python my_site/manage.py check
 python my_site/manage.py makemigrations --check --dry-run
 python my_site/manage.py test blog_app
 python -m pip_audit --strict -r requirements.txt
 ```
 
-For Docker changes, also run `docker compose config --quiet` and
-`docker build -f my_site/blog_app/Dockerfile -t django-notes:local .`.
-For UI changes, verify mobile navigation, forms, and note actions at narrow and
-wide viewport sizes. Permission changes need tests for both the author and
-another signed-in user, including direct POST requests.
+The project does not currently configure a separate linter or type checker.
 
-## Pull Requests
+For Docker changes, also validate and build the image:
 
-Provide a concise description of the problem and solution. Link related issues
-and include screenshots or recordings for visible interface changes.
+```bash
+docker compose config --quiet
+docker build -f my_site/blog_app/Dockerfile -t django-notes:local .
+docker run --rm django-notes:local python manage.py test blog_app
+```
 
-Before requesting review, confirm that:
+For interface changes, check navigation, forms, and note actions on mobile and
+desktop. For permission changes, test anonymous visitors, the note's author, and
+another signed-in user, including direct POST requests. Never use real account
+data in screenshots or test fixtures.
 
-- [ ] the change is focused and contains no unrelated formatting;
-- [ ] tests cover new or corrected behavior where practical;
-- [ ] lint, type checks, tests, and builds pass locally when available;
-- [ ] documentation is updated when usage or behavior changes;
-- [ ] no secrets, credentials, generated artifacts, or debug code are included.
+## Open a pull request
 
-Be responsive to review feedback. Maintainers may request changes or close a
-pull request that is out of scope, unsafe, or no longer aligned with the
-project.
+Explain the problem, what changed, and how you checked it. Link related issues
+and include screenshots for visible interface changes. Note any migrations or
+configuration changes that a maintainer needs to apply.
+
+Before submitting, review the diff for unrelated edits, generated files, secrets,
+and personal information. CI runs the application tests, Docker checks, and Python
+dependency audit; resolve failures before requesting a merge.

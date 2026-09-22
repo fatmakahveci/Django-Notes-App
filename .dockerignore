@@ -1,7 +1,52 @@
+# Repository metadata and local tooling
 .git
-.venv
+.github
+**/.idea
+**/.vscode
+
+# Python environments and bytecode
+**/.venv
+**/venv
+**/env
 **/__pycache__
-**/*.pyc
-**/db.sqlite3*
-.env
+**/*.py[cod]
+**/.python-version
+my_site/bin
+my_site/pyvenv.cfg
+
+# Local configuration and data must not enter the image
+**/.env
+**/.env.*
+**/*.sqlite3
+**/*.sqlite3-*
+**/*.sqlite3.*
+**/media
 **/staticfiles
+**/*.log
+
+# Test outputs and tooling caches (keep test source files)
+**/.pytest_cache
+**/.mypy_cache
+**/.ruff_cache
+**/.tox
+**/.nox
+**/.coverage
+**/.coverage.*
+**/coverage.xml
+**/htmlcov
+**/test-results
+**/playwright-report
+
+# Build and release outputs
+**/build
+**/dist
+**/*.egg-info
+source.tar.gz
+source.tar.gz.sha256
+
+# Editor and OS files
+**/*.swp
+**/*.swo
+**/.DS_Store
+**/._*
+**/Thumbs.db

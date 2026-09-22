@@ -3,7 +3,7 @@ from unittest.mock import patch
 from urllib.parse import parse_qs, urlsplit
 
 from django.contrib.auth.models import User
-from django.test import Client, TestCase, override_settings
+from django.test import Client, TestCase, TransactionTestCase, override_settings
 from django.urls import reverse
 
 from .models import AuthAttempt, Author, Category, Post
@@ -132,6 +132,29 @@ class NoteFeatureTests(TestCase):
         self.assertContains(response, "No notes match your filters")
         self.assertEqual(list(response.context["posts"]), [])
 
+    def test_search_uses_visible_text_entities_and_unicode(self):
+        self.post.title = "Formatting"
+        self.post.content = '<p>Planning &amp; <strong>ideas</strong></p><p>CAFÉ notes</p><script>secretcode</script>'
+        self.post.save()
+        for query in ("Planning & ideas", "café", "ideas   café"):
+            response = self.client.get(reverse("home"), {"q": query})
+            self.assertEqual(list(response.context["posts"]), [self.post])
+        for hidden in ("strong", "amp;", "secretcode"):
+            response = self.client.get(reverse("home"), {"q": hidden})
+            self.assertEqual(list(response.context["posts"]), [])
+
+    def test_search_document_updates_after_edit_and_partial_save(self):
+        self.client.force_login(self.owner)
+        self.client.post(reverse("post-edit", args=[self.post.pk]), {
+            "title": "Replacement title", "content": "<p>Replacement <em>text</em></p>",
+        })
+        self.assertEqual(list(self.client.get(reverse("home"), {"q": "Database migrations"}).context["posts"]), [])
+        self.assertEqual(list(self.client.get(reverse("home"), {"q": "Replacement text"}).context["posts"]), [self.post])
+        self.post.refresh_from_db()
+        self.post.content = "<p>Partially saved</p>"
+        self.post.save(update_fields=["content"])
+        self.assertEqual(list(self.client.get(reverse("home"), {"q": "Partially saved"}).context["posts"]), [self.post])
+
     def test_category_and_search_filters_combine(self):
         response = self.client.get(reverse("home"), {"category": self.category.pk})
         self.assertEqual(list(response.context["posts"]), [self.post])
@@ -241,3 +264,28 @@ class AuthenticationThrottleTests(TestCase):
             self.assertEqual(len(key), 64)
             self.assertNotIn("writer", key)
             self.assertNotIn("127.0.0.1", key)
+
+
+class SearchMigrationTests(TransactionTestCase):
+    def test_existing_notes_receive_searchable_text_without_content_changes(self):
+        from django.db import connection
+        from django.db.migrations.executor import MigrationExecutor
+
+        old = [("blog_app", "0010_authattempt")]
+        new = [("blog_app", "0011_post_search_text")]
+        executor = MigrationExecutor(connection)
+        executor.migrate(old)
+        try:
+            apps = executor.loader.project_state(old).apps
+            user = apps.get_model("auth", "User").objects.create(username="existing")
+            author = apps.get_model("blog_app", "Author").objects.create(user=user, user_name="Existing")
+            content = "<p>Planning &amp; <strong>ideas</strong></p>"
+            post = apps.get_model("blog_app", "Post").objects.create(title="Existing note", content=content, author=author)
+            executor = MigrationExecutor(connection)
+            executor.migrate(new)
+            migrated = executor.loader.project_state(new).apps.get_model("blog_app", "Post").objects.get(pk=post.pk)
+            self.assertEqual(migrated.search_text, "existing note planning & ideas")
+            self.assertEqual(migrated.content, content)
+        finally:
+            executor = MigrationExecutor(connection)
+            executor.migrate(executor.loader.graph.leaf_nodes())

@@ -28,6 +28,9 @@ where applicable.
 
 ### Fixed
 
+- Search visible text across HTML formatting, character entities, and Unicode
+  case differences; backfill existing notes and refresh search text on save.
+
 - Preserve paragraph breaks and decode character entities while escaping HTML.
 - Allow category-free posts in the public form and Django admin.
 - Restore previously truncated author names when they match linked usernames;

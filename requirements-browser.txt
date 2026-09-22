@@ -1,4 +1,0 @@
-# Optional browser tests; install Chromium separately with Playwright.
--r requirements.txt
-
-playwright==1.63.0

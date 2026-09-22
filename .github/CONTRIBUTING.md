@@ -54,7 +54,7 @@ docker run --rm django-notes:local python manage.py test blog_app
 For interface changes, run the browser regression test:
 
 ```bash
-python -m pip install -r requirements-browser.txt
+python -m pip install -r requirements-dev.txt
 python -m playwright install chromium
 python scripts/test_browser.py
 ```

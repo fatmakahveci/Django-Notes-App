@@ -5,7 +5,7 @@
 pip-audit==2.10.1
 
 # Browser tests; run `python -m playwright install chromium` after installation.
-playwright==1.63.0
+playwright==1.64.0
 
 # Assemble screenshots into the README demo.
 Pillow==12.3.0

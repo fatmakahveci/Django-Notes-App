@@ -8,4 +8,4 @@ pip-audit==2.10.1
 playwright==1.63.0
 
 # Assemble screenshots into the README demo.
-Pillow==12.3.0
+Pillow==13.0.0
